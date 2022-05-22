@@ -1,9 +1,12 @@
+import os
 import discord
+from dotenv import load_dotenv
 
-initial_extensions = ['countrybot.commands.date']
+initial_extensions = ['countrybot.cogs.datecog']
 intents = discord.Intents.default()
 intents.message_content = True
 
+load_dotenv()
 bot = discord.Bot()
 
 if __name__ == '__main__':
@@ -19,4 +22,4 @@ async def on_ready():
     activity = discord.CustomActivity(name=f"over {69} countries", type=discord.ActivityType.watching) # Placeholder value for amount of countries
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
-bot.run('OTc3NjU0Nzk1MjE5MzkwNTQ1.G2ulv_.zNsQc5orIJr1B9_oiDLW57D_bADwYjp58gkt5o')
+bot.run(os.getenv('TOKEN'))
