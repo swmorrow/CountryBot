@@ -4,3 +4,4 @@ class Country:
             Attributes:
                 foo: Lorem ipsum.
     """
+    pass
