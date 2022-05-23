@@ -1,6 +1,6 @@
 import discord
 from discord import option, ApplicationContext
-import countrybot.utils as utils
+import countrybot.io as io
 from countrybot.RPDate import RPDate
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
@@ -28,7 +28,7 @@ class Date(commands.Cog):
         """Sets the RP date in zero-leading YYYY-MM-DD format."""
         
         rpdate = RPDate(date, sep)
-        utils.save_rpdate(rpdate)
+        io.save_rpdate(rpdate, ctx.guild_id)
 
         await ctx.respond(f"Successfully set RP date to {rpdate}!")
 
@@ -36,7 +36,7 @@ class Date(commands.Cog):
     async def get(self, ctx: ApplicationContext) -> None:
         """Returns the current RP date."""
 
-        await ctx.respond(f"The RP date is {utils.load_rpdate()}.")
+        await ctx.respond(f"The RP date is {io.load_rpdate(ctx.guild_id)}.")
 
         
 def setup(bot):

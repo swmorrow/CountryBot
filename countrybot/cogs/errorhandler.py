@@ -20,8 +20,9 @@ class ErrorHandler(commands.Cog):
         error: :class:`commands.CommandError`
             The Exception raised.
         """
+        
         if isinstance(error, commands.MissingPermissions):
-            await ctx.respond("Error: Invalid permissions!", ephemeral=True) # TODO: make only user see this
+            await ctx.respond("Error: Invalid permissions!", ephemeral=True)
             return
             
         if hasattr(ctx.command, 'on_error') or not isinstance(error.original, Exception):
@@ -33,12 +34,15 @@ class ErrorHandler(commands.Cog):
 
             if isinstance(error.original, DateNotSetError):
                 await ctx.respond("Error: No date set!", ephemeral=True)
-        
+                return
+
             if ctx.command.name == "set" and isinstance(error.original, ValueError):
-                await ctx.respond("Error: Invalid date!", ephemeral=True)
-            
+                await ctx.respond(f"Error: Invalid date; {ctx.selected_options[0]['value']} does not match the format YYYY-MM-DD!", ephemeral=True)
+                return
+
             if isinstance(error.original, PickleError):
                 await ctx.respond("Error: RPDate failed to (un)serialize", ephemeral=True)
+                return
 
         
 
