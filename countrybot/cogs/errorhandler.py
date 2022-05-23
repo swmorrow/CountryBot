@@ -20,7 +20,7 @@ class ErrorHandler(commands.Cog):
         error: :class:`commands.CommandError`
             The Exception raised.
         """
-        
+
         if isinstance(error, commands.MissingPermissions):
             await ctx.respond("Error: Invalid permissions!", ephemeral=True)
             return
@@ -37,7 +37,7 @@ class ErrorHandler(commands.Cog):
                 return
 
             if ctx.command.name == "set" and isinstance(error.original, ValueError):
-                await ctx.respond(f"Error: Invalid date; {ctx.selected_options[0]['value']} does not match the format YYYY-MM-DD!", ephemeral=True)
+                await ctx.respond(f"Error: Invalid date!")
                 return
 
             if isinstance(error.original, PickleError):

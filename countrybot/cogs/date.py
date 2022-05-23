@@ -22,12 +22,14 @@ class Date(commands.Cog):
     
     @dategroup.command()
     @has_permissions(administrator=True)
-    @option("date", description="Date in zero-leading YYYY-MM-DD format (ex. 1991-05-21)")
+    @option("year", description="RP Year")
+    @option("month", description="RP Month (Default: Jan.)", default=1, required=False)
+    @option("day", description="RP Day (Default: 1st of the month)", default=1, required=False)
     @option("sep", description="IRL days per in-RP year (Default: 2)", default=2, required=False)
-    async def set(self, ctx: ApplicationContext, date: str, sep: float) -> None:
-        """Sets the RP date in zero-leading YYYY-MM-DD format."""
+    async def set(self, ctx: ApplicationContext, year: int, month: int, day: int, sep: float) -> None:
+        """Sets the RP date."""
         
-        rpdate = RPDate(date, sep)
+        rpdate = RPDate(year, month, day, sep)
         io.save_rpdate(rpdate, ctx.guild_id)
 
         await ctx.respond(f"Successfully set RP date to {rpdate}!")

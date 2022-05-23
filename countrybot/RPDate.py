@@ -1,6 +1,5 @@
 from datetime import date, datetime, timedelta
 from time import strptime
-from locale import setlocale, LC_ALL
 import config
 
 class RPDate:
@@ -16,11 +15,9 @@ class RPDate:
         Date that the in-RP date was set. Used to calculate current in-RP date.
     """
 
-    def __init__(self, raw_date: str, sep: float = 2) -> None:
-        setlocale(LC_ALL, config.LOCALE)
-        raw_date = strptime(raw_date, "%x")
+    def __init__(self, year: int, month: int, day: int, sep: float) -> None:
 
-        self.start_date = date(raw_date.tm_year, raw_date.tm_mon, raw_date.tm_mday)
+        self.start_date = date(year, month, day)
         self.sep = sep
         self.irl_start_date = datetime.now()
     
@@ -32,7 +29,7 @@ class RPDate:
         return date.strftime("%B %d, %Y")
  
     def get_date(self) -> date:
-        irldelta = (datetime.now() - self.irl_start_date) / timedelta(days=1) # convert timedelta to floating point days WHY DO YOU NOT WORKKKKKKKKK
+        irldelta = (datetime.now() - self.irl_start_date) / timedelta(days=1)
         rpdelta = (irldelta/self.sep)*365.2425
         rp_date = self.start_date.toordinal()+rpdelta
         return date.fromordinal(int(rp_date))
