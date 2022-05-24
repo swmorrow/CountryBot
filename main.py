@@ -29,13 +29,9 @@ async def on_ready():
 
     bot_guilds = set([guild.id for guild in bot.guilds])
     registered_guilds = set(io.get_guilds())
-    
-    # print(bot_guilds)
-    # print(registered_guilds)
+
     guilds_joined = list(bot_guilds.difference(registered_guilds))
     guilds_left = list(registered_guilds.difference(bot_guilds))
-    # print(guilds_joined)
-    # print(guilds_left)
 
     if len(guilds_joined) != 0:
         print('Guilds joined since last episode...')

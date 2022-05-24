@@ -4,8 +4,7 @@ __pycache__/
 *$py.class
 
 # Data
-data/country_database.db
-data/*.pickle
+*/country_database.db
 
 # C extensions
 *.so

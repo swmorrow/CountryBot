@@ -1,5 +1,5 @@
 import pickle, config, sqlite3
-from countrybot.RPDate import DateNotSetError, RPDate
+from countrybot.rpdate import DateNotSetError, RPDate
 from typing import List, Union
 from contextlib import closing
 
@@ -16,7 +16,7 @@ def register(guild_id: int) -> None:
             con.commit()
     
 def get_guilds() -> List[Union[int, None]]:
-    """Gets list of guilds saved in the d)tabase"""
+    """Gets list of guilds saved in the database"""
     with sqlite3.connect(config.DATABASE) as con:
         with closing(con.cursor()) as cur:
             

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from countrybot.cogs.date import Date
-from countrybot.RPDate import DateNotSetError
+from countrybot.rpdate import DateNotSetError
 from pickle import PickleError
 
 class ErrorHandler(commands.Cog):
@@ -44,6 +44,9 @@ class ErrorHandler(commands.Cog):
                 await ctx.respond("Error: RPDate failed to (un)serialize", ephemeral=True)
                 return
 
+            if isinstance(error.original, AttributeError):
+                await ctx.respond("Error: no RPDate set!", ephemeral=True)
+                return 
         
 
 def setup(bot):
