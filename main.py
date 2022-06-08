@@ -2,7 +2,7 @@ import os, discord, config
 import countrybot.io as io
 from dotenv import load_dotenv
 
-initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler']
+initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler', 'countrybot.cogs.country']
 intents = discord.Intents.default()
 intents.message_content = True
 

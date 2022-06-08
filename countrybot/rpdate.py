@@ -14,7 +14,6 @@ class RPDate:
     """
 
     def __init__(self, year: int, month: int, day: int, ticks: float) -> None:
-
         self.start_date = date(year, month, day)
         self.ticks = ticks
         self.irl_start_date = datetime.now()
@@ -28,6 +27,7 @@ class RPDate:
         return date.strftime("%B %d, %Y")
  
     def get_date(self) -> date:
+        """Returns the in-RP date."""
         irldelta = (datetime.now() - self.irl_start_date) / timedelta(days=1)
         rpdelta = (irldelta/self.ticks)*365.2425
         rp_date = self.start_date.toordinal()+rpdelta
