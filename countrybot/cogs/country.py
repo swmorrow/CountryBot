@@ -1,6 +1,6 @@
 import discord
 from discord.ui import Button
-from discord import option, ApplicationContext, SelectOption
+from discord import option, ApplicationContext, SelectOption, Interaction
 from countrybot import io
 from countrybot.rpdate import RPDate
 from countrybot.modals import CountryAddModal
@@ -21,9 +21,12 @@ class Country(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    countrygroup = SlashCommandGroup("country", "Commands pertaining to the RP date")
-    
-    ### COMMANDS ###
+    countrygroup = SlashCommandGroup("country", "Commands pertaining to countries and playable entities")
+
+    approval_channelgroup = countrygroup.create_subgroup("approval_channel", "Commands pertaining to the country approval channel")
+
+
+    ### COUNTRY COMMANDS ###
 
     @countrygroup.command() # TODO: Add support for other entities (orgs, characters, etc)
     async def add(self, ctx: ApplicationContext): # maybe make an option for the message to not be ephemeral?
@@ -40,15 +43,50 @@ class Country(commands.Cog):
                     SelectOption(label="Character", description="Play as a Character"),
                 ],
             )
-            async def select_callback(self, select, interaction):
+            async def select_callback(self, select, interaction: Interaction):
                 modal = CountryAddModal(select.values[0], title="temp")
                 modal.title = f"Add new {select.values[0]}"
                 await interaction.response.send_modal(modal)
 
         view = CountryAddView()
-        await ctx.respond("Select an entity below and click the button to create a new country/entity", view=view, ephemeral=True)
+        await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view, ephemeral=True)
 
 
+
+
+    ### CHANNEL COMMANDS ###
+
+    @approval_channelgroup.command()
+    @has_permissions(administrator=True)
+    @option("channel", description="Channel for countries awaiting approval to be posted")
+    async def set(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
+        """Sets a channel for the approval queue"""
+
+        io.save_approve_queue_channel(channel.id, ctx.guild_id)
+        await ctx.respond(f"Successfully set country approval channel to <#{channel.id}>.")
+
+    @approval_channelgroup.command()
+    async def get(self, ctx: ApplicationContext) -> None:
+        """Gets the channel used for approvals"""
+
+        channel = io.load_approve_queue_channel(ctx.guild_id)
+        if channel:
+            await ctx.respond(f"The current approval channel is <#{channel}>.")
+            return
+            
+        await ctx.respond("A country approval channel has not been set!")
+
+    @approval_channelgroup.command()
+    @has_permissions(administrator=True) # TODO: Raise error if there already is not one set.
+    async def remove(self, ctx: ApplicationContext) -> None:
+        """Removes the current approval queue channel"""
+
+        if io.load_approve_queue_channel(ctx.guild_id):
+            io.save_approve_queue_channel(None, ctx.guild_id)
+            await ctx.respond("Successfully removed the country approval channel.")
+            return
+
+        await ctx.respond("A country approval channel has not been set!")
 
 def setup(bot):
     bot.add_cog(Country(bot))

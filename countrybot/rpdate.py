@@ -12,12 +12,11 @@ class RPDate:
     irl_start_date: :class:`datetime`
         Date that the in-RP date was set. Used to calculate current in-RP date.
     """
-
+ 
     def __init__(self, year: int, month: int, day: int, ticks: float) -> None:
         self.start_date = date(year, month, day)
         self.ticks = ticks
         self.irl_start_date = datetime.now()
-        self.channel = None
     
     def __eq__(self, other) -> bool:
         return self.get_date() == other.get_date()

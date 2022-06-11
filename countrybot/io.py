@@ -5,16 +5,6 @@ from contextlib import closing
 
 ### Guild/RPDate IO Functions ###
 
-def register(guild_id: int) -> None:
-    """Registers guild to database"""
-    with sqlite3.connect(config.DATABASE) as con:
-        with closing(con.cursor()) as cur:
-
-            cur.execute('''INSERT INTO Guilds (guild_id, rpdate)
-                           VALUES((?), NULL);''',
-                           (guild_id,))
-            con.commit()
-    
 def get_guilds() -> List[Union[int, None]]:
     """Gets list of guilds saved in the database"""
     with sqlite3.connect(config.DATABASE) as con:
@@ -25,6 +15,16 @@ def get_guilds() -> List[Union[int, None]]:
 
     return [guild[0] for guild in guilds]
 
+def register(guild_id: int) -> None:
+    """Registers guild to database"""
+    with sqlite3.connect(config.DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur.execute('''INSERT INTO Guilds (guild_id, rpdate, rpdate_channel)
+                           VALUES((?), NULL, NULL);''',
+                           (guild_id,))
+            con.commit()
+    
 def unregister(guild_id: int) -> None:
     """Unregisters guild from database"""
     with sqlite3.connect(config.DATABASE) as con:
@@ -64,9 +64,64 @@ def save_rpdate(rpdate: RPDate, guild_id: int) -> None:
                            (rpdate_bytes, guild_id))
             con.commit()
 
+def save_rpdate_channel(rpdate_channel, guild_id: int) -> None:
+    """Saves RPDate channel to the database """
+    with sqlite3.connect(config.DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur.execute('''UPDATE Guilds
+                           SET rpdate_channel = (?)
+                           WHERE guild_id = (?);''',
+                           (rpdate_channel, guild_id))
+            con.commit()
+
+def load_rpdate_channel(guild_id: int) -> int:
+    """Loads RP date channel from database"""
+    with sqlite3.connect(config.DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur = cur.execute('''SELECT rpdate_channel FROM Guilds
+                                 WHERE guild_id = (?);''',
+                                 (guild_id,))
+
+            row = cur.fetchone()
+
+    return row[0]
+
+def save_approve_queue_channel(rpdate_channel, guild_id: int) -> None:
+    """Saves approval queue channel to the database """
+    with sqlite3.connect(config.DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur.execute('''UPDATE Guilds
+                           SET approve_channel = (?)
+                           WHERE guild_id = (?);''',
+                           (rpdate_channel, guild_id))
+            con.commit()
+
+def load_approve_queue_channel(guild_id: int) -> int:
+    """Loads RP date channel from database"""
+    with sqlite3.connect(config.DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur = cur.execute('''SELECT approve_channel FROM Guilds
+                                 WHERE guild_id = (?);''',
+                                 (guild_id,))
+
+            row = cur.fetchone()
+
+    return row[0]
+
+
 ### Country IO Functions ###
 
 def get_num_countries() -> int:
     return 69 # placeholder
+
+def register_country():
+    pass
+
+def register_country():
+    pass
 
 #TODO: Implement Country IO Functions

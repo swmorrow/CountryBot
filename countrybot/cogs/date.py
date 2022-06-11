@@ -1,11 +1,11 @@
 import discord
 from discord import option, ApplicationContext
-from countrybot import io
-from countrybot.rpdate import RPDate
 from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions
 
+import countrybot.io as io
+from countrybot.rpdate import RPDate
 
 class Date(commands.Cog):
     r"""A collection of the commands pertaining to the RP date.
@@ -22,7 +22,10 @@ class Date(commands.Cog):
 
     dategroup = SlashCommandGroup("date", "Commands pertaining to the RP date")
     
-    ### COMMANDS ###
+    channelgroup = dategroup.create_subgroup("channel", "Commands pertaining to the RP date channel")
+
+
+    ### GENERAL COMMANDS ###
     
     @dategroup.command()
     @has_permissions(administrator=True)
@@ -62,36 +65,53 @@ class Date(commands.Cog):
 
         await ctx.respond(f"1 RP year advances every " + advance)
 
-    @dategroup.command()
+
+    ### CHANNEL COMMANDS ###
+
+    @channelgroup.command()
+    async def get(self, ctx: ApplicationContext):
+        """Sends the channel that the date is currently set in."""
+
+        channel = io.load_rpdate_channel(ctx.guild_id)
+
+        if channel:
+            await ctx.respond(f"The current date channel is <#{channel}>")
+            return
+
+        await ctx.respond(f"A date channel has not been set!")
+
+    @channelgroup.command()
     @has_permissions(administrator=True)
     @option("channel", description="Channel for date updates to be posted")
-    async def set_channel(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
+    async def set(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
         """Sets a channel for date advancements to be posted in every 24 hours."""
 
-        rpdate = io.load_rpdate(ctx.guild_id)
-        rpdate.channel = channel.id
-        io.save_rpdate(rpdate, ctx.guild_id)
+        io.save_rpdate_channel(channel.id, ctx.guild_id,)
         await ctx.respond(f"Successfully set date update channel to <#{channel.id}>.")
 
-    @dategroup.command()
+    @channelgroup.command()
     @has_permissions(administrator=True)
-    async def remove_channel(self, ctx: ApplicationContext) -> None:
+    async def remove(self, ctx: ApplicationContext) -> None:
         """Removes the current date advancement channel."""
-        
-        rpdate = io.load_rpdate(ctx.guild_id)
-        rpdate.channel = None
-        io.save_rpdate(rpdate, ctx.guild_id)
-        await ctx.respond("Successfully removed the date update channel.")
+
+        if io.load_rpdate_channel:
+            io.save_rpdate_channel(None, ctx.guild_id)
+            await ctx.respond("Successfully removed the date update channel.")
+            return
+
+        ctx.respond("A date channel has not been set!")
     
+
     ### LOOPING ###
 
     @tasks.loop(hours=24)
     async def advance_date(self):
         for guild_id in io.get_guilds():
             rpdate = io.load_rpdate(guild_id)
+            rpdate_channel = io.load_rpdate_channel(guild_id)
 
-            if rpdate is not None and rpdate.channel is not None:
-                channel = await self.bot.fetch_channel(rpdate.channel)
+            if rpdate is not None and rpdate_channel is not None:
+                channel = await self.bot.fetch_channel(rpdate_channel)
                 await channel.send(f"The RP date is {rpdate}.")
 
         
