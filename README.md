@@ -4,12 +4,21 @@ A Discord bot written in Python to manage Nation RP servers, where users can cla
 
 ### Features
 
+##### Client-side
+
 - Sets RP date
 - Keeps track of in-RP time
 - Posts date reminders in a specified channel every 24 hours
 
+##### Dev-side
+- Data storage with sqlite3
+- Command line interface with Fire for easy interaction with the database
+- (WIP) Feature testing with unittest
+
 
 ### Roadmap
-- Allow customization for when dates are posted in date channel
 - Implement countries, organizations, and people
 - Add a country queue and approval system for new countries
+- Utility and ease of life commands, such as converting flags to the discord flag emoji format
+- Allow customization for date reminder time intervals
+- Build out test infrastructure and write test cases
