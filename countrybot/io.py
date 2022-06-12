@@ -74,6 +74,11 @@ def save_rpdate_channel(rpdate_channel, guild_id: int) -> None:
                            WHERE guild_id = (?);''',
                            (rpdate_channel, guild_id))
             con.commit()
+    if rpdate_channel:
+        print(f"RPDate channel {rpdate_channel} saved to {guild_id}.")
+        return
+    print(f"RPDate channel deleted from {guild_id}.")
+
 
 def load_rpdate_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
@@ -88,7 +93,7 @@ def load_rpdate_channel(guild_id: int) -> int:
 
     return row[0]
 
-def save_approve_channel(rpdate_channel, guild_id: int) -> None:
+def save_approve_channel(approval_channel, guild_id: int) -> None:
     """Saves approval queue channel to the database """
     with sqlite3.connect(config.DATABASE) as con:
         with closing(con.cursor()) as cur:
@@ -96,8 +101,12 @@ def save_approve_channel(rpdate_channel, guild_id: int) -> None:
             cur.execute('''UPDATE Guilds
                            SET approve_channel = (?)
                            WHERE guild_id = (?);''',
-                           (rpdate_channel, guild_id))
+                           (approval_channel, guild_id))
             con.commit()
+    if approval_channel:
+        print(f"Approval channel {approval_channel} saved to {guild_id}.")
+        return
+    print(f"Approval channel deleted from {guild_id}.")
 
 def load_approve_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""

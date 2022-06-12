@@ -5,8 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions
 
 import countrybot.io as io
-from countrybot.modals import CountryAddModal
-
+import countrybot.views as views
 
 class Playable(commands.Cog):
     r"""A collection of the commands pertaining to playables.
@@ -17,7 +16,7 @@ class Playable(commands.Cog):
         The instance of the bot that is executing the commands.
     """
     
-    def __init__(self, bot):
+    def __init__(self, bot: discord.bot):
         self.bot = bot
 
     countrygroup = SlashCommandGroup("country", "Commands pertaining to countries")
@@ -33,25 +32,7 @@ class Playable(commands.Cog):
             await ctx.respond("Error: A country approval channel has not been set!")
             return
 
-        class CountryAddView(discord.ui.View):
-            def __init__(self):
-                super().__init__()
-
-            @discord.ui.select(
-                placeholder="Pick which entity to play as",
-                min_values=1,
-                max_values=1,
-                options=[
-                    discord.SelectOption(label="Country", description="Play as a Country"),
-                    discord.SelectOption(label="(UNIMPLEMENTED) Organization", description="Play as an Organization"),
-                    discord.SelectOption(label="(UNIMPLEMENTED) Character", description="Play as a Character"),
-                ],
-            )
-            async def select_callback(self, select: discord.SelectMenu, interaction: discord.Interaction):
-                modal = CountryAddModal(select.values[0], title=f"Add new {select.values[0]}", user=ctx.author)
-                await interaction.response.send_modal(modal)
-
-        view = CountryAddView()
+        view = views.CountryAddView(user=ctx.user)
         await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view, ephemeral=True)
     
     @slash_command()
@@ -59,14 +40,13 @@ class Playable(commands.Cog):
     @option("channel", description="Channel for claim message to be sent in", required=False)
     async def send_claim_msg(self, ctx: ApplicationContext, channel: discord.TextChannel):
         """Admin command to send the claim message to a specific channel"""
-        pass
-        # view = views.CountryAddView(timeout=None)
-        # if channel:
-        #     await channel.send("Select an entity below and click the button to create a new country/entity.", view=view)
-        #     await ctx.respond(f"Sent claim message to <#{channel.id}>!")
-        #     return
+        view = views.CountryAddView(timeout=None)
+        if channel:
+            await channel.send("Select an entity below and click the button to create a new country/entity.", view=view)
+            await ctx.respond(f"Sent claim message to <#{channel.id}>!")
+            return
 
-        # await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view)
+        await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view)
 
 
     ### APPROVAL CHANNEL COMMANDS ###

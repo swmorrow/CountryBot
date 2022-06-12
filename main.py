@@ -46,7 +46,7 @@ async def on_ready():
 
         for guild in guilds_left:
             io.unregister(guild)
-            print(f'- {bot.user} ~ Left guild (id: {guild}) :(') # TODO: add support for getting guild name from left guild?
+            print(f'- {bot.user} ~ Left guild (id: {guild}) :(')
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):

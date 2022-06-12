@@ -21,11 +21,3 @@ class RPOrg(RPPlayable):
                 foo: Lorem ipsum.
     """
     pass
-
-class RPCharacter(RPPlayable):
-    """Country object 
-
-            Attributes:
-                foo: Lorem ipsum.
-    """
-    pass

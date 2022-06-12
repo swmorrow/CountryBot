@@ -1,119 +1,150 @@
 import discord
-from discord.ui import InputText, Modal, View
+from discord.ui import InputText, Modal
 from datetime import datetime
 import countrybot.io as io
 from countrybot.utils import embed_img_or_desc
+import countrybot.views as views
 
-class CountryAddModal(Modal):
-    def __init__(self, _entity: str, user: discord.User, *args, **kwargs) -> None:
+class PlayableAddModal(Modal):
+    """Modal for claiming a playable entity"""
+    def __init__(self, entity: str, user: discord.User, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._entity = _entity
+        self._entity = entity
         self._user = user
-
-        # TODO: add customizability for which are required
-        self.add_item(
-            InputText(
-                label="Official Name",
-                placeholder=f"{self._entity} name",
-                style=discord.InputTextStyle.short,
-                max_length=100
-            )
-        )
-        self.add_item(
-            InputText(
-                label="Brief Overview of Lore",
-                placeholder=f"{self._entity} lore \n\nWARNING: Clicking outside of this dialogue box will delete anything written.",
-                style=discord.InputTextStyle.long,
-                max_length=1024,
-            )
-        )
-        if self._entity == "Country":
-            self.add_item(
+        fields = {
+            "All": [
+                InputText(
+                    label="Official Name",
+                    placeholder=f"{self._entity} name",
+                    style=discord.InputTextStyle.short,
+                    max_length=100
+                ),
+                InputText(
+                    label="Brief Overview of Lore",
+                    placeholder=f"{self._entity} lore \n\nWARNING: Clicking outside of this dialogue box will delete anything written.",
+                    style=discord.InputTextStyle.long,
+                    max_length=1024,
+                )
+            ],
+            "Country": [
                 InputText(
                     label="Head of State",
                     placeholder=f"{self._entity} head of state",
                     style=discord.InputTextStyle.short,
                     max_length=100,
                     required=False
-                )
-            )
-            self.add_item(
+                ),
                 InputText(
                     label="Flag",
-                    placeholder=f"Description/link to flag (ex. http://example.com/YYY.png",
+                    placeholder=f"flag Description/link (ex. http://example.com/YYY.png)",
                     style=discord.InputTextStyle.short,
-                    max_length=1000,
+                    max_length=1024,
                     required=False
-                )
-            )
-            self.add_item(
+                ),
                 InputText(
                     label="Land Claimed",
-                    placeholder=f"Description/link to claim (ex. http://example.com/YYY.png)",
+                    placeholder=f"claim Description/link (ex. http://example.com/YYY.png)",
                     style=discord.InputTextStyle.short,
-                    max_length=1000
+                    max_length=1024
                 )
-            )
+            ],
+            "Organization": [
+                InputText(
+                    label="Leader",
+                    placeholder=f"{self._entity} leader",
+                    style=discord.InputTextStyle.short,
+                    max_length=100,
+                    required=False
+                ),
+                InputText(
+                    label="Motivation",
+                    placeholder=f"{self._entity} motivation",
+                    style=discord.InputTextStyle.short,
+                    max_length=1024
+                ),
+                InputText(
+                    label="Emblem/flag",
+                    placeholder=f"Flag description/link (ex. http://example.com/YYY.png)",
+                    style=discord.InputTextStyle.short,
+                    max_length=1024,
+                    required=False
+                )
+            ],
+            "Other claim": [
+                InputText(
+                    label="Entity",
+                    placeholder="What your claim is",
+                    style=discord.InputTextStyle.short,
+                    max_length=100,
+                ),
+                InputText(
+                    label="Other info",
+                    placeholder=f"Other info about your claim",
+                    style=discord.InputTextStyle.long,
+                    max_length=1024,
+                    required=False
+                ),
+                InputText(
+                    label="Image",
+                    placeholder=f"Image description/link (ex. http://example.com/YYY.png)",
+                    style=discord.InputTextStyle.short,
+                    max_length=1024,
+                    required=False
+                ),
+            ]
+        }
+
+        for entity, list in fields.items():
+            if entity != "All" and entity != self._entity:
+                continue
+            for input_text in list:
+                self.add_item(input_text)
 
 
-    async def callback(self, interaction: discord.Interaction):
-        country_name = self.children[0].value
-        country_lore = self.children[1].value
-        country_hos = self.children[2].value
-        country_flag = self.children[3].value
-        country_claim = self.children[4].value
+    async def callback(self, interaction: discord.Interaction): # TODO: Add ability to edit claims
+        # name = self.children[0]
+        # lore = self.children[1]
+
+        ## for countries:
+        # head of state = self.children[2]
+        # flag = self.children[3]
+        # claim = self.children[4]
+
+        ## for organizations:
+        # leader = self.children[2]
+        # motivation = self.children[3]
+        # emblem/flag = self.children[4]
+
+        ## for others:
+        # entity = self.children[2]
+        # other info = self.children[3]
+        # image = self.children[4]
+
+        if self._entity == "Other claim":
+            self._entity = self.children[2]
 
         embed = discord.Embed(
-            title=country_name,
+            title=self.children[0].value,
             description=f"{self._entity} claim",
             color=discord.Color.random(),
             timestamp=datetime.now()
         )
         embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.avatar.url)
-        embed.add_field(name="Brief Overview of Lore", value=country_lore, inline=False)
+        embed.add_field(name=self.children[1].label, value=self.children[1].value, inline=False)
 
-        if self._entity == "Country":
-            if len(self.children[2].value) > 0:
-                embed.insert_field_at(index=1, name="Head of State", value=country_hos, inline=False)
+        if len(self.children[2].value) > 0:
+            embed.insert_field_at(index=1, name=self.children[2].label, value=self.children[2].value, inline=False)
 
-            if len(self.children[3].value) > 0:
-                embed_img_or_desc(embed, embed.set_thumbnail, "Flag", country_flag)
+        if len(self.children[3].value) > 0:
+            if self._entity == "Country":
+                embed_img_or_desc(embed, embed.set_thumbnail, self.children[3].label, self.children[3].value)
+            else:
+                embed.add_field(name=self.children[3].label, value=self.children[3].value, inline=False)
 
-            embed_img_or_desc(embed, embed.set_image, "Clam", country_claim)
-
-        class CountryApprovalView(View):
-            def __init__(self, timeout):
-                super().__init__(timeout=timeout)
-                self.approved = None
-                self.reason = None
-
-            @discord.ui.button(label="Approve", style=discord.ButtonStyle.green, row=0)
-            async def first_button_callback(self, button: discord.Button, interaction: discord.Interaction):
-                if interaction.user.guild_permissions.administrator:
-                    
-                    self.approved = True
-                    await interaction.response.send_message("Successfully approved the claim.", ephemeral=True)
-                    self.stop()
-
-                else:
-                    await interaction.response.send_message(f"You do not have permission to approve claims!", ephemeral=True)
-
-            @discord.ui.button(label="Deny", style=discord.ButtonStyle.red, row=1)
-            async def second_button_callback(self, button: discord.Button, interaction: discord.Interaction):
-                if interaction.user.guild_permissions.administrator:
-                    
-                    modal = DenialReasonModal(title="Reason for claim denial")
-                    await interaction.response.send_modal(modal)
-                    await modal.wait()
-
-                    self.approved = False
-                    self.reason = modal.reason
-                    self.stop()
-
-                else:
-                    await interaction.response.send_message(f"You do not have permission to deny claims!", ephemeral=True)
+        if len(self.children[4].value) > 0:
+            embed_img_or_desc(embed, embed.set_image, self.children[4].label, self.children[4].value)
      
-        approval_view = CountryApprovalView(timeout=None)
+        approval_view = views.CountryApprovalView(timeout=None)
         approval_channel_id = io.load_approve_channel(interaction.guild_id)
 
         approval_channel = await interaction.guild.fetch_channel(approval_channel_id)
@@ -131,7 +162,7 @@ class CountryAddModal(Modal):
         
             await claim_msg.edit(f"<@{interaction.user.id}> has approved this claim!", view=approval_view)
             orig_msg = await interaction.original_message()
-            await orig_msg.channel.send(f"<@{self._user.id}>, your claim \"{country_name}\" has been approved by {interaction.user.name}!")
+            await orig_msg.channel.send(f"<@{self._user.id}>, your claim \"{self.children[0].value}\" has been approved by {interaction.user.name}!")
 
             io.register_country()
             return
@@ -142,7 +173,7 @@ class CountryAddModal(Modal):
 
         msgs = {
             "deny_msg": f"<@{interaction.user.id}> has denied this claim",
-            "deny_response": f"<@{self._user.id}>, your claim \"{country_name}\" has been denied by {interaction.user.name}"
+            "deny_response": f"<@{self._user.id}>, your claim \"{self.children[0].value}\" has been denied by {interaction.user.name}"
         }
 
         for k in msgs.keys():
