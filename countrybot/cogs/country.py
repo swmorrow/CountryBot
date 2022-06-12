@@ -1,16 +1,15 @@
 import discord
-from discord.ui import Button
-from discord import option, ApplicationContext, SelectOption, Interaction
-from countrybot import io
-from countrybot.rpdate import RPDate
-from countrybot.modals import CountryAddModal
-from discord.commands import SlashCommandGroup
-from discord.ext import commands, tasks
+from discord import option, ApplicationContext
+from discord.commands import SlashCommandGroup, slash_command
+from discord.ext import commands
 from discord.ext.commands import has_permissions
 
+import countrybot.io as io
+from countrybot.modals import CountryAddModal
 
-class Country(commands.Cog):
-    r"""A collection of the commands pertaining to countries.
+
+class Playable(commands.Cog):
+    r"""A collection of the commands pertaining to playables.
 
     Attributes
     ------------
@@ -21,40 +20,56 @@ class Country(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    countrygroup = SlashCommandGroup("country", "Commands pertaining to countries and playable entities")
+    countrygroup = SlashCommandGroup("country", "Commands pertaining to countries")
+    # orggroup = SlashCommandGroup("organizaiton", "Commands pertaining to organizations") # To be implemented
+    # chargroup = SlashCommandGroup("character", "Commands pertaining to characters") # To be implemented
+    approval_channelgroup = SlashCommandGroup("approval_channel", "Commands pertaining to the country approval channel")
 
-    approval_channelgroup = countrygroup.create_subgroup("approval_channel", "Commands pertaining to the country approval channel")
-
-
-    ### COUNTRY COMMANDS ###
-
-    @countrygroup.command() # TODO: Add support for other entities (orgs, characters, etc)
-    async def add(self, ctx: ApplicationContext): # maybe make an option for the message to not be ephemeral?
-        """Send a modal to the user to add a country/entity"""
+    @slash_command() # TODO: Add support for other entities (orgs, characters, etc)
+    async def claim(self, ctx: ApplicationContext):
+        """Send a form to the user to claim a playable entity and sends it to be approved by an admin"""
+        
+        if not io.load_approve_channel(ctx.guild_id):
+            await ctx.respond("Error: A country approval channel has not been set!")
+            return
 
         class CountryAddView(discord.ui.View):
+            def __init__(self):
+                super().__init__()
+
             @discord.ui.select(
                 placeholder="Pick which entity to play as",
                 min_values=1,
                 max_values=1,
                 options=[
-                    SelectOption(label="Country", description="Play as a Country"),
-                    SelectOption(label="Organization", description="Play as an Organization"),
-                    SelectOption(label="Character", description="Play as a Character"),
+                    discord.SelectOption(label="Country", description="Play as a Country"),
+                    discord.SelectOption(label="(UNIMPLEMENTED) Organization", description="Play as an Organization"),
+                    discord.SelectOption(label="(UNIMPLEMENTED) Character", description="Play as a Character"),
                 ],
             )
-            async def select_callback(self, select, interaction: Interaction):
-                modal = CountryAddModal(select.values[0], title="temp")
-                modal.title = f"Add new {select.values[0]}"
+            async def select_callback(self, select: discord.SelectMenu, interaction: discord.Interaction):
+                modal = CountryAddModal(select.values[0], title=f"Add new {select.values[0]}", user=ctx.author)
                 await interaction.response.send_modal(modal)
 
         view = CountryAddView()
         await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view, ephemeral=True)
+    
+    @slash_command()
+    @has_permissions(administrator=True)
+    @option("channel", description="Channel for claim message to be sent in", required=False)
+    async def send_claim_msg(self, ctx: ApplicationContext, channel: discord.TextChannel):
+        """Admin command to send the claim message to a specific channel"""
+        pass
+        # view = views.CountryAddView(timeout=None)
+        # if channel:
+        #     await channel.send("Select an entity below and click the button to create a new country/entity.", view=view)
+        #     await ctx.respond(f"Sent claim message to <#{channel.id}>!")
+        #     return
+
+        # await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view)
 
 
-
-
-    ### CHANNEL COMMANDS ###
+    ### APPROVAL CHANNEL COMMANDS ###
 
     @approval_channelgroup.command()
     @has_permissions(administrator=True)
@@ -62,14 +77,14 @@ class Country(commands.Cog):
     async def set(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
         """Sets a channel for the approval queue"""
 
-        io.save_approve_queue_channel(channel.id, ctx.guild_id)
+        io.save_approve_channel(channel.id, ctx.guild_id)
         await ctx.respond(f"Successfully set country approval channel to <#{channel.id}>.")
 
     @approval_channelgroup.command()
     async def get(self, ctx: ApplicationContext) -> None:
         """Gets the channel used for approvals"""
 
-        channel = io.load_approve_queue_channel(ctx.guild_id)
+        channel = io.load_approve_channel(ctx.guild_id)
         if channel:
             await ctx.respond(f"The current approval channel is <#{channel}>.")
             return
@@ -81,12 +96,12 @@ class Country(commands.Cog):
     async def remove(self, ctx: ApplicationContext) -> None:
         """Removes the current approval queue channel"""
 
-        if io.load_approve_queue_channel(ctx.guild_id):
-            io.save_approve_queue_channel(None, ctx.guild_id)
+        if io.load_approve_channel(ctx.guild_id):
+            io.save_approve_channel(None, ctx.guild_id)
             await ctx.respond("Successfully removed the country approval channel.")
             return
 
         await ctx.respond("A country approval channel has not been set!")
 
 def setup(bot):
-    bot.add_cog(Country(bot))
+    bot.add_cog(Playable(bot))

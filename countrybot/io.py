@@ -88,7 +88,7 @@ def load_rpdate_channel(guild_id: int) -> int:
 
     return row[0]
 
-def save_approve_queue_channel(rpdate_channel, guild_id: int) -> None:
+def save_approve_channel(rpdate_channel, guild_id: int) -> None:
     """Saves approval queue channel to the database """
     with sqlite3.connect(config.DATABASE) as con:
         with closing(con.cursor()) as cur:
@@ -99,7 +99,7 @@ def save_approve_queue_channel(rpdate_channel, guild_id: int) -> None:
                            (rpdate_channel, guild_id))
             con.commit()
 
-def load_approve_queue_channel(guild_id: int) -> int:
+def load_approve_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
     with sqlite3.connect(config.DATABASE) as con:
         with closing(con.cursor()) as cur:
@@ -117,9 +117,6 @@ def load_approve_queue_channel(guild_id: int) -> int:
 
 def get_num_countries() -> int:
     return 69 # placeholder
-
-def register_country():
-    pass
 
 def register_country():
     pass

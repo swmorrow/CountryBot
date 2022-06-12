@@ -1,4 +1,4 @@
-class Playable:
+class RPPlayable:
     """Country object 
 
             Attributes:
@@ -6,7 +6,7 @@ class Playable:
     """
     pass
 
-class RPCountry(Playable):
+class RPCountry(RPPlayable):
     """Country object 
 
             Attributes:
@@ -14,7 +14,7 @@ class RPCountry(Playable):
     """
     pass
 
-class RPOrg(Playable):
+class RPOrg(RPPlayable):
     """Country object 
 
             Attributes:
@@ -22,7 +22,7 @@ class RPOrg(Playable):
     """
     pass
 
-class RPCharacter(Playable):
+class RPCharacter(RPPlayable):
     """Country object 
 
             Attributes:
