@@ -1,17 +1,17 @@
+from typing import Dict, List
 import discord
 from discord.ui import InputText, Modal
 from datetime import datetime
 import countrybot.io as io
-from countrybot.utils import embed_img_or_desc
+from countrybot.utils import children_to_embed, embed_img_or_desc
 import countrybot.views as views
 
 class PlayableAddModal(Modal):
     """Modal for claiming a playable entity"""
-    def __init__(self, entity: str, user: discord.User, *args, **kwargs) -> None:
+    def __init__(self, entity: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._entity = entity
-        self._user = user
-        fields = {
+        self._fields = {
             "All": [
                 InputText(
                     label="Official Name",
@@ -36,14 +36,14 @@ class PlayableAddModal(Modal):
                 ),
                 InputText(
                     label="Flag",
-                    placeholder=f"flag Description/link (ex. http://example.com/YYY.png)",
+                    placeholder=f"Flag description/link (ex. http://example.com/YYY.png)",
                     style=discord.InputTextStyle.short,
                     max_length=1024,
                     required=False
                 ),
                 InputText(
-                    label="Land Claimed",
-                    placeholder=f"claim Description/link (ex. http://example.com/YYY.png)",
+                    label="Claimed Land",
+                    placeholder=f"Claim description/link (ex. http://example.com/YYY.png)",
                     style=discord.InputTextStyle.short,
                     max_length=1024
                 )
@@ -94,7 +94,7 @@ class PlayableAddModal(Modal):
             ]
         }
 
-        for entity, list in fields.items():
+        for entity, list in self._fields.items():
             if entity != "All" and entity != self._entity:
                 continue
             for input_text in list:
@@ -120,71 +120,69 @@ class PlayableAddModal(Modal):
         # other info = self.children[3]
         # image = self.children[4]
 
-        if self._entity == "Other claim":
-            self._entity = self.children[2]
-
-        embed = discord.Embed(
-            title=self.children[0].value,
-            description=f"{self._entity} claim",
-            color=discord.Color.random(),
-            timestamp=datetime.now()
-        )
-        embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.avatar.url)
-        embed.add_field(name=self.children[1].label, value=self.children[1].value, inline=False)
-
-        if len(self.children[2].value) > 0:
-            embed.insert_field_at(index=1, name=self.children[2].label, value=self.children[2].value, inline=False)
-
-        if len(self.children[3].value) > 0:
-            if self._entity == "Country":
-                embed_img_or_desc(embed, embed.set_thumbnail, self.children[3].label, self.children[3].value)
-            else:
-                embed.add_field(name=self.children[3].label, value=self.children[3].value, inline=False)
-
-        if len(self.children[4].value) > 0:
-            embed_img_or_desc(embed, embed.set_image, self.children[4].label, self.children[4].value)
+        embed = children_to_embed(self.children, self._entity, interaction.user)
      
-        approval_view = views.CountryApprovalView(timeout=None)
+        approval_view = views.CountryApprovalView(interaction.user, timeout=None)
         approval_channel_id = io.load_approve_channel(interaction.guild_id)
 
         approval_channel = await interaction.guild.fetch_channel(approval_channel_id)
         claim_msg = await approval_channel.send(embed=embed, view=approval_view)
-        await interaction.response.send_message(f"Claim successfully added! An admin will approve you in <#{approval_channel_id}>.")
+        await interaction.response.send_message(f"Claim successfully added! An admin will approve you in <#{approval_channel_id}>.", ephemeral=True)
 
         await approval_view.wait()
+
         approve_button = approval_view.children[0]
         deny_button = approval_view.children[1]
+        edit_button = approval_view.children[2]
+        delete_button = approval_view.children[3]
+        orig_msg = await interaction.original_message()
 
-        if approval_view.approved:
+        if approval_view.deleter:
+            await claim_msg.delete()
+            if interaction.user.id != approval_view.deleter.id:
+                await orig_msg.channel.send(f"<@{interaction.user.id}>, your claim \"{self.children[0].value}\" has been deleted by {approval_view.deleter.name}.")
+
+        elif approval_view.edit_interaction:
+            modal = EditClaimModal(self._fields, self._entity, embed, title="Edit your claim")
+            await approval_view.edit_interaction.response.send_modal(modal)
+            await modal.wait()
+            await claim_msg.edit(view=views.CountryApprovalView(interaction.user, timeout=None), embed=modal.embed)
+
+        elif approval_view.approved:
             approve_button.label = "Approved"
             approve_button.disabled = True
             approval_view.remove_item(deny_button)
-        
-            await claim_msg.edit(f"<@{interaction.user.id}> has approved this claim!", view=approval_view)
-            orig_msg = await interaction.original_message()
-            await orig_msg.channel.send(f"<@{self._user.id}>, your claim \"{self.children[0].value}\" has been approved by {interaction.user.name}!")
+            approval_view.remove_item(delete_button)
+            approval_view.remove_item(edit_button)
+
+            embed.color=discord.Color.green()
+            await claim_msg.edit(f"<@{approval_view.approver.id}> has approved this claim!", view=approval_view, embed=embed)
+            await orig_msg.channel.send(f"<@{interaction.user.id}>, your claim \"{self.children[0].value}\" has been approved by {approval_view.approver.name}!")
 
             io.register_country()
             return
+        
+        else:
+            deny_button.label = "Denied"
+            deny_button.disabled = True
+            approval_view.remove_item(approve_button)
+            approval_view.remove_item(delete_button)
+            approval_view.remove_item(edit_button)
 
-        deny_button.label = "Denied"
-        deny_button.disabled = True
-        approval_view.remove_item(approve_button)
+            msgs = {
+                "deny_msg": f"<@{approval_view.approver.id}> has denied this claim",
+                "deny_response": f"<@{interaction.user.id}>, your claim \"{self.children[0].value}\" has been denied by {approval_view.approver.name}"
+            }
 
-        msgs = {
-            "deny_msg": f"<@{interaction.user.id}> has denied this claim",
-            "deny_response": f"<@{self._user.id}>, your claim \"{self.children[0].value}\" has been denied by {interaction.user.name}"
-        }
+            for k in msgs.keys():
+                if approval_view.reason:
+                    msgs[k] += f" for the following reason: {approval_view.reason}"
+                else:
+                    msgs[k] += "."
 
-        for k in msgs.keys():
-            if approval_view.reason:
-                msgs[k] += f" for the following reason: {approval_view.reason}"
-            else:
-                msgs[k] += "."
-
-        await claim_msg.edit(msgs["deny_msg"], view=approval_view)
-        orig_msg = await interaction.original_message()
-        await orig_msg.channel.send(msgs["deny_response"])
+            embed.color=discord.Color.brand_red()
+            await claim_msg.edit(msgs["deny_msg"], view=approval_view, embed=embed)
+            await orig_msg.channel.send(msgs["deny_response"])
 
 class DenialReasonModal(Modal):
     def __init__(self, *args, **kwargs) -> None:
@@ -204,4 +202,27 @@ class DenialReasonModal(Modal):
         self.reason = self.children[0].value
         self.stop()
         await interaction.response.send_message("Successfully denied the claim.", ephemeral=True)
-        
+
+class EditClaimModal(Modal):
+    def __init__(self, fields: Dict[str,List[InputText]], entity: str, embed: discord.Embed, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._fields = fields
+        self._entity = entity
+        self.embed = embed
+
+        for entity, list in self._fields.items():
+            if entity != "All" and entity != self._entity:
+                continue
+            for input_text in list:
+                for field in embed.fields:
+                    if field.name.removesuffix(" Description") != input_text.label:
+                        continue
+                    input_text.value = field.value
+                    break
+
+                self.add_item(input_text)
+                
+    async def callback(self, interaction: discord.Interaction):
+        self.embed = children_to_embed(self.children, self._entity, interaction.user)
+        await interaction.response.send_message("Successfully edited claim!", ephemeral=True)
+        self.stop()

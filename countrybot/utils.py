@@ -1,6 +1,6 @@
 import discord
 from requests import head
-from typing import Callable
+from datetime import datetime
 
 ### Image Functions ###
 
@@ -34,3 +34,29 @@ def embed_img_or_desc(embed: discord.Embed, set_fn, name: str, value: str) -> bo
 
     embed.add_field(name=f"{name} Link", value=value, inline=False)
     return True
+
+### Modal Functions ###
+
+def children_to_embed(children, entity, user) -> discord.Embed:
+    embed = discord.Embed(
+        description=children[0].value,
+        title=f"{entity} claim",
+        color=discord.Color.blurple(),
+        timestamp=datetime.now()
+    )
+    embed.set_author(name=user.display_name, icon_url=user.avatar.url)
+    embed.add_field(name=children[1].label, value=children[1].value, inline=False)
+
+    if len(children[2].value) > 0:
+        embed.insert_field_at(index=1, name=children[2].label, value=children[2].value, inline=False)
+
+    if len(children[3].value) > 0:
+        if entity == "Country":
+            embed_img_or_desc(embed, embed.set_thumbnail, children[3].label, children[3].value)
+        else:
+            embed.add_field(name=children[3].label, value=children[3].value, inline=False)
+
+    if len(children[4].value) > 0:
+        embed_img_or_desc(embed, embed.set_image, children[4].label, children[4].value)
+
+    return embed

@@ -32,7 +32,7 @@ class Playable(commands.Cog):
             await ctx.respond("Error: A country approval channel has not been set!")
             return
 
-        view = views.CountryAddView(user=ctx.user)
+        view = views.CountryAddView()
         await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view, ephemeral=True)
     
     @slash_command()
