@@ -1,10 +1,6 @@
 from typing import Literal
 import discord
 from requests import head
-from datetime import datetime
-from config import ICON
-
-### Image Functions ###
 
 def is_url(url: str) -> bool:
     """Checks if an image is a url (starts with http:// or https://)"""
@@ -53,33 +49,3 @@ def embed_img_or_desc(embed: discord.Embed, img_type: Literal["thumbnail","image
     embed.add_field(name=f"{name} Link", value=value, inline=False)
     return False
 
-### Modal Functions ###
-
-def children_to_embed(children, entity, user, embed: discord.Embed = None) -> discord.Embed:
-    if embed:
-        embed.clear_fields()
-        embed.remove_image()
-        embed.remove_thumbnail()
-    else:
-        embed = discord.Embed(
-            title=children[0].value,
-            description=children[1].value,
-            color=discord.Color.blurple(),
-            timestamp=datetime.now()
-        )
-    embed.set_footer(text=f"{entity} claim", icon_url=ICON)
-    embed.set_author(name=user.display_name, icon_url=user.avatar.url)
-
-    if len(children[2].value) > 0:
-        embed.insert_field_at(index=1, name=children[2].label, value=children[2].value, inline=False)
-
-    if len(children[3].value) > 0:
-        if entity == "Country":
-            embed_img_or_desc(embed, "thumbnail", children[3].label, children[3].value)
-        else:
-            embed.add_field(name=children[3].label, value=children[3].value, inline=False)
-
-    if len(children[4].value) > 0:
-        embed_img_or_desc(embed, "image", children[4].label, children[4].value)
-
-    return embed

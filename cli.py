@@ -1,5 +1,5 @@
 import fire
-from countrybot.io import (
+from countrybot.utils.io import (
     register,
     unregister,
     save_rpdate_channel,
@@ -8,7 +8,7 @@ from countrybot.io import (
     load_approve_channel,
     get_num_countries
 )
-from countrybot.utils import (
+from countrybot.utils.imgurls import (
     is_url,
     is_url_image
 )

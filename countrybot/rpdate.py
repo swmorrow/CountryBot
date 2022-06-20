@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from countrybot.utils.excepts import InvalidDateError
 
 class RPDate:
     """Object containing RP date information.
@@ -14,7 +15,11 @@ class RPDate:
     """
  
     def __init__(self, year: int, month: int, day: int, ticks: float) -> None:
-        self._start_date = date(year, month, day)
+        try:
+            self._start_date = date(year, month, day)
+        except ValueError:
+            raise InvalidDateError
+
         self._irl_start_date = datetime.now()
         self.ticks = ticks
 
@@ -30,8 +35,5 @@ class RPDate:
         irldelta = (datetime.now() - self._irl_start_date) / timedelta(days=1)
         rpdelta = (irldelta/self.ticks)*365.2425
         rp_date = self._start_date.toordinal()+rpdelta
-        return date.fromordinal(int(rp_date))
-    
 
-class DateNotSetError(Exception):
-    pass
+        return date.fromordinal(int(rp_date))

@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
-from countrybot.cogs.date import Date
-from countrybot.rpdate import DateNotSetError
 from pickle import PickleError
+import countrybot.utils.excepts as e
+from countrybot.utils.embeds import error_embed
 
 class ErrorHandler(commands.Cog):
 
@@ -21,33 +21,37 @@ class ErrorHandler(commands.Cog):
             The Exception raised.
         """
 
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.respond("Error: Invalid permissions!", ephemeral=True)
-            return
+
             
         if hasattr(ctx.command, 'on_error') or not isinstance(error.original, Exception):
             return
         
-        print(error)
+        match error:
+            case commands.MissingPermissions():
+                embed = error_embed("Invalid permissions!")
+            
+            case _:
+                match error.original:
+                    case e.ChannelNotSetError():
+                        embed = error_embed("Channel not set!")
 
-        if isinstance(ctx.cog, Date): # Date cog exceptions
+                    case e.DateNotSetError():
+                        embed = error_embed("Date not set!")
 
-            if isinstance(error.original, DateNotSetError):
-                await ctx.respond("Error: No date set!", ephemeral=True)
-                return
+                    case e.InvalidDateError():
+                        embed = error_embed("Invalid date!")
 
-            if ctx.command.name == "set" and isinstance(error.original, ValueError):
-                await ctx.respond(f"Error: Invalid date!")
-                return
+                    case PickleError():
+                        embed = error_embed("Failed to (un)serialize")
 
-            if isinstance(error.original, PickleError):
-                await ctx.respond("Error: RPDate failed to (un)serialize", ephemeral=True)
-                return
+                    case AttributeError():
+                        embed = error_embed("No RPDate set!")
 
-            if isinstance(error.original, AttributeError):
-                await ctx.respond("Error: no RPDate set!", ephemeral=True)
-                return 
+                    case _:
+                        print(error)
+                        embed = error_embed("Unknown error!")
         
+        await ctx.respond(embed=embed, ephemeral=True)
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))

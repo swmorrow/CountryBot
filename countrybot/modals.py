@@ -1,8 +1,8 @@
 from typing import Dict, List
 import discord
 from discord.ui import InputText, Modal
-import countrybot.io as io
-from countrybot.utils import children_to_embed
+import countrybot.utils.io as io
+import countrybot.utils.embeds as emb
 import countrybot.views as views
 
 class ClaimModal(Modal):
@@ -62,7 +62,7 @@ class ClaimModal(Modal):
                     max_length=1024
                 ),
                 InputText(
-                    label="Emblem/flag",
+                    label="Emblem/Flag",
                     placeholder=f"Flag description/link (ex. http://example.com/YYY.png)",
                     style=discord.InputTextStyle.short,
                     max_length=1024,
@@ -119,15 +119,16 @@ class ClaimModal(Modal):
         # other info = self.children[3]
         # image = self.children[4]
 
-        embed = children_to_embed(self.children, self.entity, interaction.user)
-        approval_view = views.CountryApprovalView(interaction.user, self, embed, timeout=None)
+        embed = emb.children_to_embed(self.children, self.entity, interaction.user)
         approval_channel_id = io.load_approve_channel(interaction.guild_id)
-
-        approval_channel = await interaction.guild.fetch_channel(approval_channel_id)
+        approval_channel = await interaction.guild.fetch_channel(approval_channel_id)    
+        approval_view = views.CountryApprovalView(interaction.user, self, embed)
         approval_view.claim_msg = await approval_channel.send(embed=embed, view=approval_view)
 
-        await interaction.response.send_message(f"Claim successfully added! An admin will approve you in <#{approval_channel_id}>.", ephemeral=True)
-        approval_view.orig_msg = await interaction.original_message()
+        await interaction.response.send_message(embed=emb.success_embed(f"Claim added! An admin will approve you in <#{approval_channel_id}>."), ephemeral=True)
+        
+        orig_msg = await interaction.original_message()
+        approval_view.orig_msg = orig_msg
 
         await approval_view.wait()
 
@@ -148,7 +149,7 @@ class DenialReasonModal(Modal):
     async def callback(self, interaction: discord.Interaction):
         self.reason = self.children[0].value
         self.stop()
-        await interaction.response.send_message("Successfully denied the claim.", ephemeral=True)
+        await interaction.response.send_message(embed=emb.success_embed("Claim denied"), ephemeral=True)
 
 class EditClaimModal(Modal):
     def __init__(self, fields: Dict[str,List[InputText]], entity: str, embed: discord.Embed, *args, **kwargs) -> None:
@@ -168,7 +169,7 @@ class EditClaimModal(Modal):
                 if input_text.label == "Brief Overview of Lore":
                     input_text.value = embed.description
 
-                if input_text.label in ["Image", "Emblem/flag", "Claimed Land"] and embed.image:
+                if input_text.label in ["Image", "Emblem/Flag", "Claimed Land"] and embed.image:
                     input_text.value = embed.image.url
             
                 if input_text.label == "Flag" and embed.thumbnail:
@@ -186,6 +187,6 @@ class EditClaimModal(Modal):
                 self.add_item(input_text)
                 
     async def callback(self, interaction: discord.Interaction):
-        self.embed = children_to_embed(self.children, self._entity, interaction.user, self.embed)
-        await interaction.response.send_message("Successfully edited claim!", ephemeral=True)
+        self.embed = emb.children_to_embed(self.children, self._entity, interaction.user, self.embed)
+        await interaction.response.send_message(embed=emb.success_embed("Claim edited!"), ephemeral=True)
         self.stop()

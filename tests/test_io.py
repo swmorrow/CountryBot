@@ -1,5 +1,5 @@
 import unittest
-import countrybot.io as io
+import countrybot.utils.io as io
 from countrybot.rpdate import RPDate, DateNotSetError
 
 class TestIOMethods(unittest.TestCase):

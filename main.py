@@ -1,13 +1,15 @@
 import os, discord, config
-import countrybot.io as io
+import countrybot.utils.io as io
+import countrybot.utils.embeds as emb
+from discord.ext.commands import MinimalHelpCommand
 from dotenv import load_dotenv
 
 initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler', 'countrybot.cogs.country']
 intents = discord.Intents.default()
-intents.message_content = True
+# intents.message_content = True
 
 load_dotenv()
-bot = discord.Bot()
+bot = discord.Bot(help_command=MinimalHelpCommand())
 
 if __name__ == '__main__':
 
@@ -47,6 +49,10 @@ async def on_ready():
         for guild in guilds_left:
             io.unregister(guild)
             print(f'- {bot.user} ~ Left guild (id: {guild}) :(')
+
+@bot.event
+async def on_application_command(ctx: discord.ApplicationContext):
+    print(f"{ctx.user} ~ used /{ctx.command} in {ctx.guild.name} (id: {ctx.guild.id})")
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
