@@ -1,14 +1,18 @@
-import pickle, config, sqlite3
+import pickle, sqlite3
 from typing import List, Union
 from contextlib import closing
-from countrybot.utils.excepts import ChannelNotSetError, DateNotSetError
+
+from countrybot.configparser import DATABASE
 from countrybot.rpdate import RPDate
+
+from .excepts import ChannelNotSetError, DateNotSetError
+
 
 ### Guild IO Functions ###
 
 def get_guilds() -> List[Union[int, None]]:
     """Gets list of guilds saved in the database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
             
             cur = cur.execute('''SELECT guild_id FROM Guilds;''')
@@ -18,7 +22,7 @@ def get_guilds() -> List[Union[int, None]]:
 
 def register(guild_id: int) -> None:
     """Registers guild to database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur.execute('''INSERT INTO Guilds (guild_id, rpdate, rpdate_channel)
@@ -28,7 +32,7 @@ def register(guild_id: int) -> None:
     
 def unregister(guild_id: int) -> None:
     """Unregisters guild from database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur.execute('''DELETE FROM Guilds
@@ -41,7 +45,7 @@ def unregister(guild_id: int) -> None:
 
 def load_rpdate(guild_id: int) -> RPDate:
     """Loads RP date from database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur = cur.execute('''SELECT rpdate FROM Guilds
@@ -61,7 +65,7 @@ def save_rpdate(rpdate: RPDate, guild_id: int) -> None:
     if rpdate:
         rpdate = pickle.dumps(rpdate)
 
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur.execute('''UPDATE Guilds
@@ -74,7 +78,7 @@ def save_rpdate(rpdate: RPDate, guild_id: int) -> None:
 
 def save_rpdate_channel(rpdate_channel, guild_id: int) -> None:
     """Saves RPDate channel to the database """
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur.execute('''UPDATE Guilds
@@ -90,7 +94,7 @@ def save_rpdate_channel(rpdate_channel, guild_id: int) -> None:
 
 def load_rpdate_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur = cur.execute('''SELECT rpdate_channel FROM Guilds
@@ -105,7 +109,7 @@ def load_rpdate_channel(guild_id: int) -> int:
 
 def save_approve_channel(approval_channel, guild_id: int) -> None:
     """Saves approval queue channel to the database """
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur.execute('''UPDATE Guilds
@@ -120,7 +124,7 @@ def save_approve_channel(approval_channel, guild_id: int) -> None:
 
 def load_approve_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
-    with sqlite3.connect(config.DATABASE) as con:
+    with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:
 
             cur = cur.execute('''SELECT approve_channel FROM Guilds
@@ -132,14 +136,3 @@ def load_approve_channel(guild_id: int) -> int:
         raise ChannelNotSetError
 
     return row[0]
-
-
-### Country IO Functions ###
-
-def get_num_countries() -> int:
-    return 69 # placeholder
-
-def register_country():
-    pass
-
-#TODO: Implement Country IO Functions

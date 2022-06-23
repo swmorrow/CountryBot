@@ -6,7 +6,6 @@ from countrybot.utils.io import (
     load_rpdate_channel,
     save_approve_channel,
     load_approve_channel,
-    get_num_countries
 )
 from countrybot.utils.imgurls import (
     is_url,

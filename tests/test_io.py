@@ -1,6 +1,7 @@
 import unittest
 import countrybot.utils.io as io
-from countrybot.rpdate import RPDate, DateNotSetError
+from countrybot.rpdate import RPDate
+from countrybot.utils.excepts import DateNotSetError
 
 class TestIOMethods(unittest.TestCase):
 

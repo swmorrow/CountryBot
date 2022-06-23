@@ -1,7 +1,7 @@
 import discord
 from datetime import datetime
 from countrybot.utils.imgurls import embed_img_or_desc
-from config import ICON
+from countrybot.configparser import ICON
 
 def msg_embed(msg: str, title: str = None) -> discord.Embed:
     """Converts message to default embed"""
@@ -13,29 +13,29 @@ def msg_embed(msg: str, title: str = None) -> discord.Embed:
 def error_embed(msg: str, title: str = "Error") -> discord.Embed:
     """Converts message to error embed"""
     return discord.Embed(
-        title=title,
+        title=":no_entry:  " + title,
         color=discord.Color.brand_red(),
-        description=":no_entry:  " + msg
+        description=msg
     )
 
 def success_embed(msg: str, title: str = "Success") -> discord.Embed:
     """Converts message to success embed"""
     return discord.Embed(
-        title=title,
+        title=":white_check_mark:  " + title,
         color=discord.Color.green(),
-        description=":white_check_mark:  " + msg
+        description=msg
     )
 
 def warning_embed(msg: str, title: str = "Warning") -> discord.Embed:
-    """Converts message to success embed"""
+    """Converts message to warning embed"""
     return discord.Embed(
-        title=title,
+        title=":information_source:  " + title,
         color=discord.Color.yellow(),
-        description=":information_source:  " + msg
+        description=msg
     )
 
 def children_to_embed(children, entity, user, embed: discord.Embed = None) -> discord.Embed:
-    """Converts list of modal children to embed"""
+    """Converts list of claim modal children to embed"""
     if embed:
         embed.clear_fields()
         embed.remove_image()

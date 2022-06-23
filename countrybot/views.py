@@ -35,8 +35,6 @@ class CountryApprovalView(discord.ui.View): # I don't think it is possible to ma
             )
             self.stop()
 
-            io.register_country()
-
         else:
             await interaction.response.send_message(embed=emb.error_embed("You do not have permission to approve claims!"), ephemeral=True)
 
