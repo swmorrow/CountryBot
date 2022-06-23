@@ -20,8 +20,6 @@ class ErrorHandler(commands.Cog):
         error: :class:`commands.CommandError`
             The Exception raised.
         """
-
-
             
         if hasattr(ctx.command, 'on_error') or not isinstance(error.original, Exception):
             return
