@@ -4,7 +4,9 @@ __pycache__/
 *$py.class
 
 # Data
+country_database.db
 */country_database.db
+data/*
 
 # C extensions
 *.so

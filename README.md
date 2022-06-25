@@ -10,6 +10,8 @@ The following section outlines CountryBot's client-side and dev-side features.
 - Sets RP date
 - Keeps track of in-RP time
 - Posts date reminders in a specified channel every 24 hours
+- Allows users to claim a country by sending a command to fill out a dialog
+- Allows admins to keep track of claims with the click of a button
 
 ### Dev-side
 - Data storage with sqlite3

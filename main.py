@@ -1,20 +1,24 @@
-import os, discord, config
-import countrybot.io as io
+import os, discord, logging
+import countrybot.utils.io as io
+from countrybot.configparser import LOG_FILE
 from dotenv import load_dotenv
 
-initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler']
-intents = discord.Intents.default()
-intents.message_content = True
 
-load_dotenv()
 bot = discord.Bot()
 
+initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler', 'countrybot.cogs.country']
+intents = discord.Intents.default()
+intents.members = True
+
+load_dotenv()
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename=LOG_FILE, encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
+
 if __name__ == '__main__':
-
-    config.ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
-    config.DATA_DIRECTORY =  os.path.join(config.ABSOLUTE_PATH, os.path.dirname(config.DATA_DIRECTORY + '\\'))
-    config.DATABASE = os.path.join(config.DATA_DIRECTORY, 'country_database.db')
-
     for extension in initial_extensions:
         try:
             bot.load_extension(extension)
@@ -24,7 +28,12 @@ if __name__ == '__main__':
 @bot.event
 async def on_ready():
     print(f'{bot.user} ~ Good morning, chat!')
-    activity = discord.Activity(name=f"over {io.get_num_countries()} countries", type=discord.ActivityType.watching)
+    
+    activity = discord.Activity(
+        name=f"over your countries",
+        type=discord.ActivityType.watching,
+
+    )
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
     bot_guilds = set([guild.id for guild in bot.guilds])
@@ -46,7 +55,11 @@ async def on_ready():
 
         for guild in guilds_left:
             io.unregister(guild)
-            print(f'- {bot.user} ~ Left guild (id: {guild}) :(') # TODO: add support for getting guild name from left guild?
+            print(f'- {bot.user} ~ Left guild (id: {guild}) :(')
+
+@bot.event
+async def on_application_command(ctx: discord.ApplicationContext):
+    print(f"{ctx.user} ~ used /{ctx.command} in {ctx.guild.name} (id: {ctx.guild.id})")
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
