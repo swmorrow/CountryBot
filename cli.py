@@ -1,5 +1,6 @@
 import fire
 from countrybot.utils.io import (
+    get_guilds,
     register,
     unregister,
     save_rpdate_channel,

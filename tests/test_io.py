@@ -9,11 +9,11 @@ class TestIOMethods(unittest.TestCase):
         old_guilds = io.get_guilds()
         io.register(1)
         new_guilds = io.get_guilds()
-        self.assertNotEqual(old_guilds, new_guilds, "Failed to register")
+        self.assertEqual(set(new_guilds), set(old_guilds + [1]), "Failed to register")
 
         io.unregister(1)
         new_guilds = io.get_guilds()
-        self.assertEqual(old_guilds, new_guilds, "Failed to unregister")
+        self.assertEqual(set(old_guilds), set(new_guilds), "Failed to unregister")
 
     def test_rpdate_io(self): 
         io.register(2)
@@ -31,5 +31,5 @@ class TestIOMethods(unittest.TestCase):
 
     # TODO: Add more tests
 
-if __name__ == '__main__': # TODO: Set up test database
+if __name__ == '__main__':
     unittest.main()

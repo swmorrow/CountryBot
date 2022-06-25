@@ -15,5 +15,3 @@ ICON = config['Graphics']['Icon']
 
 LOG_LEVEL = config['Logging']['Log level']
 LOG_FILE = config['Logging']['Log file']
-
-print('unittest' in sys.modules.keys())
