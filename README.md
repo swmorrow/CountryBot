@@ -20,20 +20,14 @@ The following section outlines CountryBot's client-side and dev-side features.
 ## Roadmap
 The following section is a rough outline for features to be added and a progress checker of current updates.
 
-### Before v0.2.0
-- [ ] Help command
-- [x] Change footer image
-- [x] Switch success/denial emoji to the title
-- [x] Change config to ini
-- [x] Add roadmap to readme
-
 ### v0.2.x Updates
-- Fix rpdate reposting when the bot turns off and on again bug
-- Autorole users when approved
-- Switch database to postgres asyncio
-- Settings command
-- Undo button for approvals/denials
-- Add installation instructions to readme
+- [ ] Help command
+- [ ] Fix rpdate reposting when the bot turns off and on again bug
+- [ ] Autorole users when approved
+- [ ] Switch database to postgres asyncio
+- [ ] Settings command
+- [ ] Undo button for approvals/denials
+- [ ] Add installation instructions to readme
 
 ### V0.3.X Plans:
 - Support expansion tracking
