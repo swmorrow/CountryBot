@@ -76,7 +76,7 @@ def save_rpdate(rpdate: RPDate, guild_id: int) -> None:
 
 ### Channel IO Functions ###
 
-def save_rpdate_channel(rpdate_channel, guild_id: int) -> None:
+def save_rpdate_channel(rpdate_channel: int, guild_id: int) -> None:
     """Saves RPDate channel to the database """
     with sqlite3.connect(DATABASE) as con:
         with closing(con.cursor()) as cur:

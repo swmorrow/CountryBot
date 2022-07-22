@@ -7,7 +7,7 @@ db = config['Data Management']['Database']
 if 'unittest' in sys.modules.keys():
     db = config['Data Management']['Test database']
 
-ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__)).removesuffix('\\countrybot') # may not work on linux, untested
+ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__)).removesuffix('\\countrybot')
 DATA_DIRECTORY =  os.path.join(ABSOLUTE_PATH, os.path.dirname(config['Data Management']['Data directory'] + '\\'))
 DATABASE = os.path.join(DATA_DIRECTORY, db)
 

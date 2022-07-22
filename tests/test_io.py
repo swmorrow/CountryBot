@@ -1,7 +1,9 @@
 import unittest
 import countrybot.utils.io as io
 from countrybot.rpdate import RPDate
-from countrybot.utils.excepts import DateNotSetError
+from countrybot.utils.excepts import DateNotSetError, ChannelNotSetError
+
+NUM_TESTS = 3
 
 class TestIOMethods(unittest.TestCase):
 
@@ -29,7 +31,38 @@ class TestIOMethods(unittest.TestCase):
 
         io.unregister(2)
 
-    # TODO: Add more tests
+    def test_rpdate_channel_io(self):
+        io.register(3)
+        with self.assertRaises(ChannelNotSetError):
+            io.load_rpdate_channel(3)
+
+        test_channel = 1
+        io.save_rpdate_channel(test_channel, 3)
+        loaded_channel = io.load_rpdate_channel(3)
+        self.assertIsNotNone(loaded_channel)
+
+        self.assertEqual(loaded_channel, test_channel)
+
+        io.unregister(3)
+
+    def test_approve_channel_io(self):
+        io.register(4)
+        with self.assertRaises(ChannelNotSetError):
+            io.load_approve_channel(4)
+
+        test_channel = 1
+        io.save_approve_channel(test_channel, 4)
+        loaded_channel = io.load_approve_channel(4)
+        self.assertIsNotNone(loaded_channel)
+
+        self.assertEqual(loaded_channel, test_channel)
+
+        io.unregister(4)
+    
+    @classmethod
+    def tearDownClass(cls):
+        for i in range(1, NUM_TESTS+1):
+            io.unregister(i)
 
 if __name__ == '__main__':
     unittest.main()
