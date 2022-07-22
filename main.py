@@ -32,7 +32,6 @@ async def on_ready():
     activity = discord.Activity(
         name=f"over your countries",
         type=discord.ActivityType.watching,
-
     )
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
