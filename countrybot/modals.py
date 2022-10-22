@@ -127,7 +127,7 @@ class ClaimModal(Modal):
 
         await interaction.response.send_message(embed=emb.success_embed(f"Claim added! An admin will approve you in <#{approval_channel_id}>."), ephemeral=True)
         
-        orig_msg = await interaction.original_message()
+        orig_msg = await interaction.original_response()
         approval_view.orig_msg = orig_msg
 
         await approval_view.wait()
