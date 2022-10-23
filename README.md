@@ -23,10 +23,11 @@ The following section outlines CountryBot's client-side and dev-side features.
 The following section is a rough outline for features to be added and a progress checker of current updates.
 
 ### v0.2.x Updates
+- [x] "Flagify" command to convert user uploaded images to discord-style flag emojis
 - [ ] Help command
 - [ ] Fix rpdate reposting when the bot turns off and on again bug
 - [ ] Autorole users when approved
-- [ ] Switch database to postgres asyncio
+- [ ] Switch database to asyncio sqlite3
 - [ ] Settings command
 - [ ] Undo button for approvals/denials
 - [ ] Add installation instructions to readme
