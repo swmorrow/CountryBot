@@ -34,7 +34,7 @@ def warning_embed(msg: str, title: str = "Warning") -> discord.Embed:
         description=msg
     )
 
-def children_to_embed(children, entity, user, embed: discord.Embed = None) -> discord.Embed:
+async def children_to_embed(children, entity, user, embed: discord.Embed = None) -> discord.Embed:
     """Converts list of claim modal children to embed"""
     if embed:
         embed.clear_fields()
@@ -56,11 +56,11 @@ def children_to_embed(children, entity, user, embed: discord.Embed = None) -> di
 
     if len(children[3].value) > 0:
         if entity == "Country":
-            embed_img_or_desc(embed, "thumbnail", children[3].label, children[3].value)
+            await embed_img_or_desc(embed, "thumbnail", children[3].label, children[3].value)
         else:
             embed.add_field(name=children[3].label, value=children[3].value, inline=False)
 
     if len(children[4].value) > 0:
-        embed_img_or_desc(embed, "image", children[4].label, children[4].value)
+        await embed_img_or_desc(embed, "image", children[4].label, children[4].value)
 
     return embed

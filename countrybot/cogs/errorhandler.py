@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 from pickle import PickleError
+from PIL import UnidentifiedImageError, Image
+from aiohttp import InvalidURL
 import countrybot.utils.excepts as e
 from countrybot.utils.embeds import error_embed
 
@@ -38,6 +40,18 @@ class ErrorHandler(commands.Cog):
 
                     case e.InvalidDateError():
                         embed = error_embed("Invalid date!")
+                        
+                    case e.InvalidAliasingError():
+                        embed = error_embed("Invalid aliasing value!")
+
+                    case InvalidURL():
+                        embed = error_embed("Invalid URL!")
+                    
+                    case Image.DecompressionBombError():
+                        embed = error_embed("Image too large!")
+
+                    case UnidentifiedImageError():
+                        embed = error_embed("Invalid image!")
 
                     case PickleError():
                         embed = error_embed("Failed to (un)serialize")

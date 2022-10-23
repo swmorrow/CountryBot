@@ -119,7 +119,7 @@ class ClaimModal(Modal):
         # other info = self.children[3]
         # image = self.children[4]
 
-        embed = emb.children_to_embed(self.children, self.entity, interaction.user)
+        embed = await emb.children_to_embed(self.children, self.entity, interaction.user)
         approval_channel_id = io.load_approve_channel(interaction.guild_id)
         approval_channel = await interaction.guild.fetch_channel(approval_channel_id)    
         approval_view = views.CountryApprovalView(interaction.user, self, embed)
@@ -187,6 +187,6 @@ class EditClaimModal(Modal):
                 self.add_item(input_text)
                 
     async def callback(self, interaction: discord.Interaction):
-        self.embed = emb.children_to_embed(self.children, self._entity, interaction.user, self.embed)
+        self.embed = await emb.children_to_embed(self.children, self._entity, interaction.user, self.embed)
         await interaction.response.send_message(embed=emb.success_embed("Claim edited!"), ephemeral=True)
         self.stop()

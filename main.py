@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 bot = discord.Bot()
 
-initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler', 'countrybot.cogs.country']
+initial_extensions = ['countrybot.cogs.date', 'countrybot.cogs.errorhandler', 'countrybot.cogs.country', 'countrybot.cogs.utility']
 intents = discord.Intents.default()
 intents.members = True
 

@@ -23,7 +23,7 @@ class Playable(commands.Cog):
     approval_channelgroup = SlashCommandGroup("approval_channel", "Commands pertaining to the country approval channel")
 
     @slash_command()
-    async def claim(self, ctx: ApplicationContext):
+    async def claim(self, ctx: ApplicationContext) -> None:
         """Send a form to the user to claim a playable entity and sends it to be approved by an admin"""
         
         io.load_approve_channel(ctx.guild_id) # check if a channel is already set

@@ -45,7 +45,7 @@ class Date(commands.Cog):
         else:
             advance = "day!"
 
-        await ctx.respond(embed=emb.success_embed(f"Set RP date to {rpdate} with years advancing every " + advance))
+        await ctx.respond(embed=emb.success_embed(f"Set RP date to {rpdate} with years advancing every {advance}"))
 
     @dategroup.command()
     async def get(self, ctx: ApplicationContext) -> None:
