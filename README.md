@@ -47,7 +47,7 @@ The following section is a rough outline for features to be added and a progress
 - [ ] Help command
 - [x] Fix rpdate reposting when the bot turns off and on again bug
 - [ ] Autorole users when approved
-- [ ] Switch database to asyncio sqlite3
+- [x] Switch database to asyncio sqlite3
 - [ ] Settings command
 - [ ] Undo button for approvals/denials
 - [x] Add installation instructions to readme
