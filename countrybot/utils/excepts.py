@@ -9,3 +9,6 @@ class InvalidDateError(ValueError):
 
 class RPDateNotPostedError(Exception):
     pass
+
+class ImageTooSmallError(Exception):
+    pass

@@ -5,8 +5,6 @@ from discord.ext import commands
 import countrybot.utils.imgurls as imgurls
 import countrybot.utils.embeds as emb
 
-from io import BytesIO
-
 class Utility(commands.Cog):
     r"""A collection of utility commands.
 
@@ -36,11 +34,8 @@ class Utility(commands.Cog):
         else: # TODO: currently, if both are specified, it only returns the file. This should be fixed/signposted.
             flagified_img = await imgurls.flagify_image(file)
 
-        with BytesIO() as output:
-            flagified_img.save(output, format="PNG")
-            output.seek(0)
-
-            await ctx.followup.send(file=discord.File(fp=output, filename='flagified_image.png'))
+        await ctx.followup.send(file=discord.File(fp=flagified_img, filename='flagified_image.png'))
+        flagified_img.close()
 
 def setup(bot):
     bot.add_cog(Utility(bot))

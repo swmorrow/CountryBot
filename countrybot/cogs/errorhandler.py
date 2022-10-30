@@ -42,6 +42,9 @@ class ErrorHandler(commands.Cog):
                     case e.InvalidDateError():
                         embed = error_embed("Invalid date!")
 
+                    case e.ImageTooSmallError():
+                        embed = error_embed("Image too small!")
+
                     case aiohttp.InvalidURL():
                         embed = error_embed("Invalid URL!")
                     
@@ -56,6 +59,12 @@ class ErrorHandler(commands.Cog):
 
                     case AttributeError():
                         embed = error_embed("No RPDate set!")
+                    
+                    case discord.errors.HTTPException():
+                        try:
+                            embed = error_embed(f"Error sending message: {error.original.status} {error.original.text}")
+                        except Exception as err:
+                            print_exception(err)
 
                     case _:
                         print(error)
