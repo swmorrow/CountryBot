@@ -50,7 +50,7 @@ The following section is a rough outline for features to be added and a progress
 - [ ] Switch database to asyncio sqlite3
 - [ ] Settings command
 - [ ] Undo button for approvals/denials
-- [ ] Add installation instructions to readme
+- [x] Add installation instructions to readme
 
 ### V0.3.X Plans:
 - Support expansion tracking
