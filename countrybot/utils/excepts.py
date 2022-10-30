@@ -6,6 +6,3 @@ class DateNotSetError(Exception):
 
 class InvalidDateError(ValueError):
     pass
-
-class InvalidAliasingError(ValueError):
-    pass

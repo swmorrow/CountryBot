@@ -1,13 +1,9 @@
 import discord
-from discord import option, ApplicationContext, Attachment
-from discord.commands import SlashCommandGroup, slash_command
+from discord.commands import slash_command
 from discord.ext import commands
-from discord.ext.commands import has_permissions
 
-import countrybot.utils.io as io
-import countrybot.utils.embeds as emb
 import countrybot.utils.imgurls as imgurls
-import countrybot.views as views
+import countrybot.utils.embeds as emb
 
 from io import BytesIO
 
@@ -24,20 +20,27 @@ class Utility(commands.Cog):
         self.bot = bot
 
     @slash_command()
-    @option("flag", description="Image to be converted to a discord emoji-style flag")
-    @option("aliasing", description="Aliasing of corners (accepted values betweeen 0 and 1)", required=False)
-    async def flagify_file(self, ctx: ApplicationContext, flag: Attachment, aliasing: float = 0.7) -> None:
-        with BytesIO() as image_binary:
-            await imgurls.flagify_image(flag, aliasing, image_binary)
-            await ctx.respond(file=discord.File(fp=image_binary, filename='flagified_image.png'))  
+    @discord.option("file", description="File to be converted to a discord emoji-style flag", required=False)
+    @discord.option("url", description="URL of image to be converted to a discord emoji-style flag", required=False)
+    async def flagify(self, ctx: discord.ApplicationContext, file: discord.Attachment, url: str) -> None:
+        """Takes an image and removes the corners, converting it into the style of a Discord flag emoji."""
+        if file is None and url is None:
+            await ctx.respond(embed=emb.error_embed("No flag specified!"))
+            return
 
-    @slash_command()
-    @option("url", description="URL of image to be converted to a discord emoji-style flag")
-    @option("aliasing", description="Aliasing of corners (accepted values betweeen 0 and 1)", required=False)
-    async def flagify_url(self, ctx: ApplicationContext, url: str, aliasing: float = 0.7) -> None:
-        with BytesIO() as image_binary:
-            await imgurls.flagify_image(url, aliasing, image_binary)
-            await ctx.respond(file=discord.File(fp=image_binary, filename='flagified_image.png'))
+        await ctx.response.defer()
+
+        if file is None:
+            flagified_img = await imgurls.flagify_image(url)
+
+        else: # TODO: currently, if both are specified, it only returns the file. This should be fixed/signposted
+            flagified_img = await imgurls.flagify_image(file)
+
+        with BytesIO() as output:
+            flagified_img.save(output, format="PNG")
+            output.seek(0)
+
+            await ctx.followup.send(file=discord.File(fp=output, filename='flagified_image.png'))
 
 def setup(bot):
     bot.add_cog(Utility(bot))

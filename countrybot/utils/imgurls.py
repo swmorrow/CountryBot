@@ -1,10 +1,10 @@
 import discord
 import numpy as np
-from PIL import UnidentifiedImageError, Image
+import PIL.Image
+import PIL
 from time import process_time
 from typing import Literal
 import aiohttp
-from countrybot.utils.excepts import InvalidAliasingError
 from io import BytesIO
 
 ### EMBED URL FUNCTIONS ###
@@ -49,80 +49,80 @@ async def embed_img_or_desc(embed: discord.Embed, img_type: Literal["thumbnail",
 
 ### FLAGIFY FUNCTIONS ###
 
-def _set_pixel(img: np.ndarray, x: int, y: int, val: int, channel: int = 3):
-    """Sets"""
-    corner_pixels = (
-        img[len(img[0])//8-x][len(img[0])//8-y], # top left 
-        img[-len(img[0])//8+x][len(img[0])//8-y], # top right 
-        img[len(img[0])//8-x][-len(img[0])//8+y], # bottom left
-        img[-len(img[0])//8+x][-len(img[0])//8+y] # bottom right
-    )
-    for pixel in corner_pixels:
-        pixel[channel] = val
+async def flagify_image(flag: discord.Attachment | str) -> PIL.Image:
+    t1_start = process_time() 
 
-async def flagify_image(flag: discord.Attachment | str, aliasing: float, image_binary: BytesIO) -> Image:
-    if aliasing < 0 or aliasing > 1:
-        raise InvalidAliasingError
+    ALIASING = 0.7
 
     if isinstance(flag, str):
         async with aiohttp.ClientSession() as session:
             image_formats = ("image/png", "image/jpeg", "image/jpg", "image/webp")
             async with session.head(flag) as req:
                 if not req.content_type in image_formats:
-                    raise UnidentifiedImageError
+                    raise PIL.UnidentifiedImageError
             
             async with session.get(flag) as req:
-                raw_img = Image.open(BytesIO(await req.read()))
+                raw_img = PIL.Image.open(BytesIO(await req.read()))
 
     else:
-        raw_img = Image.open(BytesIO(await flag.read()))
+        raw_img = PIL.Image.open(BytesIO(await flag.read()))
 
     raw_img = raw_img.convert("RGBA")
     raw_img.putalpha(255)
 
+    if raw_img.size[0]*raw_img.size[1] > 8_000_000:
+        raise PIL.Image.DecompressionBombError
+
+    ONE_EIGHTHS_L = raw_img.size[0]//8
+    ONE_EIGHTHS_H = raw_img.size[1]//8
+
     img = np.array(raw_img)
 
-    t1_start = process_time() 
-
-    img = np.array(raw_img)
-
-    ONE_EIGHTHS_H = len(img)//8
-    ONE_EIGHTHS_L = len(img[0])//8
-
+    # This can be optimized, however, it is currently sufficient since discord files must be below 8mb.
     for y in range(ONE_EIGHTHS_H*2): 
         for x in range(ONE_EIGHTHS_L*2):
             rad = np.sqrt(y*y + x*x)
             try:
-                # if x and y are both in the corner
-                if rad >= ONE_EIGHTHS_L:
-                    # if the pixels make up the border of the corner
-                    if rad < ONE_EIGHTHS_L+aliasing and rad > ONE_EIGHTHS_L-aliasing:
-                        aliased_opacity = 255-(rad-ONE_EIGHTHS_L)*255
-                        _set_pixel(img, x, y, aliased_opacity) # set pixel to aliansed opacity
-                    
-                    # if the pixels are in the zone to be nmade transparent
-                    elif not y > ONE_EIGHTHS_L and not x > ONE_EIGHTHS_L:
-                        _set_pixel(img, x, y, 0) # make pixel transparent
+                # if neither x nor y are in the corner, continue
+                if rad < ONE_EIGHTHS_L:
+                    continue
 
-                    else:
-                        break
+                corner_pixels = (
+                    img[ONE_EIGHTHS_L-x][ONE_EIGHTHS_L-y], # top left 
+                    img[-ONE_EIGHTHS_L+x][ONE_EIGHTHS_L-y], # top right 
+                    img[ONE_EIGHTHS_L-x][-ONE_EIGHTHS_L+y], # bottom left
+                    img[-ONE_EIGHTHS_L+x][-ONE_EIGHTHS_L+y] # bottom right
+                )
 
-            except IndexError:
-                pass # just in case
+                # if the pixels make up the border of the corner
+                if rad < ONE_EIGHTHS_L+ALIASING and rad > ONE_EIGHTHS_L-ALIASING:
+                    # Set the opacity proportional to how close the radius is to 1/8 the length of the image
+                    opacity = 255-(rad-ONE_EIGHTHS_L)*255
+                
+                # if the pixels are in the zone to be made transparent
+                elif y <= ONE_EIGHTHS_L and x <= ONE_EIGHTHS_L:
+                    opacity = 0
+
+                else: # the pixels are in the solid part of the corner, so continue to the next row
+                    break
+
+                for pixel in corner_pixels:
+                    pixel[3] = opacity # idx 3 is the alpha channel
+
+            except IndexError: # just in case
+                print("Out of bounds in Flagify")
 
     # check if there are any pixels left on the sides
     residual_pixels = False
 
-    if img[0][1][3] != 0 or img[1][0][3] != 0: # if there is a line at the top
+    if img[0][1][3] != 0 or img[1][0][3] != 0: # if there is a line at the top or on the side
         residual_pixels = True
 
     t1_stop = process_time()
-    out_image = Image.fromarray(img)
+    out_image = PIL.Image.fromarray(img)
 
     if residual_pixels: 
         out_image = out_image.crop((1, 1, len(img[0])-1, len(img)-1))
         
-    print(f"Elapsed time during the whole program: {t1_stop-t1_start}s") 
-
-    out_image.save(image_binary, 'PNG')
-    image_binary.seek(0)
+    print(f"Elapsed time to process image: {t1_stop-t1_start}s") 
+    return out_image
