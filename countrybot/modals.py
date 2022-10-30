@@ -100,7 +100,7 @@ class ClaimModal(Modal):
                 self.add_item(input_text)
 
 
-    async def callback(self, interaction: discord.Interaction): # TODO: Add ability to edit claims
+    async def callback(self, interaction: discord.Interaction):
         # name = self.children[0]
         # lore = self.children[1]
 
