@@ -18,7 +18,25 @@ The following section outlines CountryBot's client-side and dev-side features.
 - Command line interface with Fire for easy interaction with the database
 - (WIP) Feature testing with unittest
 
-
+## Installation
+Ensure that you have Python >=3.10.x before setting up your virtual environment.
+1. Clone this repo: `git clone https://github.com/swmorrow/CountryBot.git`
+1. Set up your virtual environment
+    1. Navigate into the CountryBot directory and create a virtual environment
+        - On Linux/Mac: `$ python3.10 -m venv .venv`
+        - On Windows: `C:> py -m venv .venv`
+    1. Activate the virtual environment on your system
+        - On Linux/Mac: `$ source .venv/bin/activate`
+        - On Windows: `C:> .\env\Scripts\activate`
+1. Install the required dependencies with pip
+    - On Linux/Mac: `$ pip install -r requirements.txt`
+        - if you do not have pip, do `$ python3 -m ensurepip --upgrade`
+    - On Windows: `C:> py -m pip install -r requirements.txt`
+        - if you do not have pip, do `C:> py -m ensurepip --upgrade`
+1. Run the `main.py` file
+    - On Windows: `C:> py main.py`
+    - On Linux/Mac: `$ python3 main.py`
+    
 ## Roadmap
 The following section is a rough outline for features to be added and a progress checker of current updates.
 
