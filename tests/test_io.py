@@ -1,9 +1,10 @@
 import unittest
 import countrybot.utils.io as io
+import datetime as dt
 from countrybot.rpdate import RPDate
-from countrybot.utils.excepts import DateNotSetError, ChannelNotSetError
+from countrybot.utils.excepts import DateNotSetError, ChannelNotSetError, RPDateNotPostedError
 
-NUM_TESTS = 3
+NUM_TESTS = 5
 
 class TestIOMethods(unittest.TestCase):
 
@@ -58,7 +59,20 @@ class TestIOMethods(unittest.TestCase):
         self.assertEqual(loaded_channel, test_channel)
 
         io.unregister(4)
-    
+
+    def test_last_rpdate_posting_io(self):
+        io.register(5)
+
+        with self.assertRaises(RPDateNotPostedError):
+            io.load_last_rpdate_posting(5)
+
+        date = dt.datetime.now()
+        io.save_last_rpdate_posting(date, 5)
+        
+        self.assertEqual(io.load_last_rpdate_posting(5), date)
+
+        io.unregister(5)
+
     @classmethod
     def tearDownClass(cls):
         for i in range(1, NUM_TESTS+1):

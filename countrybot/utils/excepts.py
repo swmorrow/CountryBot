@@ -6,3 +6,6 @@ class DateNotSetError(Exception):
 
 class InvalidDateError(ValueError):
     pass
+
+class RPDateNotPostedError(Exception):
+    pass

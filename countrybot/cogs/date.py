@@ -4,6 +4,9 @@ from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions
 
+import datetime as dt
+from countrybot.utils.excepts import RPDateNotPostedError
+
 import countrybot.utils.io as io
 import countrybot.utils.embeds as emb
 from countrybot.rpdate import RPDate
@@ -105,16 +108,24 @@ class Date(commands.Cog):
 
     ### LOOPING ###
 
-    @tasks.loop(hours=24)
+    @tasks.loop(minutes=30) # make this lower if it doesnt affect performance
     async def advance_date(self):
         for guild_id in io.get_guilds():
             try:
-                rpdate_channel = io.load_rpdate_channel(guild_id)
-                channel = await self.bot.fetch_channel(rpdate_channel)
-                await channel.send(embed=discord.Embed(title=f"The RP date is {io.load_rpdate(guild_id)}.", color=discord.Color.blurple())) 
-            except:
-                pass
+                rpdate = io.load_rpdate(guild_id)
+                channel_id = io.load_rpdate_channel(guild_id)
+                guild_channel = await self.bot.fetch_channel(channel_id)
+                last_posting = io.load_last_rpdate_posting(guild_id)
 
+                if dt.datetime.now() - last_posting > dt.timedelta(days=1):
+                    await guild_channel.send(embed=discord.Embed(title=f"The RP date is {rpdate}.", color=discord.Color.blurple()))
+                    io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
+
+            except Exception as e:
+                if isinstance(e, RPDateNotPostedError):
+                    await guild_channel.send(embed=discord.Embed(title=f"The RP date is {rpdate}.", color=discord.Color.blurple())) 
+
+                    io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
         
 def setup(bot):
     bot.add_cog(Date(bot))

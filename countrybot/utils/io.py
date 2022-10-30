@@ -1,11 +1,12 @@
 import pickle, sqlite3
+import datetime as dt
 from typing import List, Union
 from contextlib import closing
 
 from countrybot.configparser import DATABASE
 from countrybot.rpdate import RPDate
 
-from .excepts import ChannelNotSetError, DateNotSetError
+from .excepts import ChannelNotSetError, DateNotSetError, RPDateNotPostedError
 
 
 ### Guild IO Functions ###
@@ -54,7 +55,7 @@ def load_rpdate(guild_id: int) -> RPDate:
 
             row = cur.fetchone()
             
-    if not row[0]:
+    if row[0] is None:
         raise DateNotSetError
 
     rpdate = pickle.loads(row[0])
@@ -73,6 +74,33 @@ def save_rpdate(rpdate: RPDate, guild_id: int) -> None:
                            WHERE guild_id = (?);''',
                            (rpdate, guild_id))
             con.commit()
+
+def save_last_rpdate_posting(date: dt.datetime, guild_id: int) -> None:
+    """Saves the time of last rpdate posting for a guild in the database"""
+    with sqlite3.connect(DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur.execute('''UPDATE Guilds
+                           SET last_rpdate_posting = (?)
+                           WHERE guild_id = (?);''',
+                           (date, guild_id))
+            con.commit()
+
+def load_last_rpdate_posting(guild_id: int) -> dt.datetime:
+    """Loads RP date from database"""
+    with sqlite3.connect(DATABASE) as con:
+        with closing(con.cursor()) as cur:
+
+            cur = cur.execute('''SELECT last_rpdate_posting FROM Guilds
+                                 WHERE guild_id = (?);''',
+                                 (guild_id,))
+
+            row = cur.fetchone()
+            
+    if row[0] is None:
+        raise RPDateNotPostedError
+
+    return dt.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S.%f")
 
 ### Channel IO Functions ###
 
