@@ -42,6 +42,8 @@ The following section is a rough outline for features to be added and a progress
 
 ### v0.2.x Updates
 - [x] "Flagify" command to convert user uploaded images to discord-style flag emojis
+- [x] Removed needs for member intents
+- [ ] Fix CLI
 - [ ] Help command
 - [ ] Fix rpdate reposting when the bot turns off and on again bug
 - [ ] Autorole users when approved
@@ -59,6 +61,3 @@ The following section is a rough outline for features to be added and a progress
 
 ### Long Term
 - Warfare
-
-### Backburner
-- Remove need for member intents 

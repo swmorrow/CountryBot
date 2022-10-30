@@ -49,7 +49,7 @@ async def children_to_embed(children, entity, user, embed: discord.Embed = None)
     embed.title = children[0].value
     embed.description = children[1].value
     embed.set_footer(text=f"{entity.removesuffix(' claim')} claim", icon_url=ICON)
-    embed.set_author(name=user.display_name, icon_url=user.avatar.url)
+    embed.set_author(name=user.display_name, icon_url=user.display_avatar.url) #, icon_url=user.avatar.url)
 
     if len(children[2].value) > 0:
         embed.insert_field_at(index=1, name=children[2].label, value=children[2].value, inline=False)

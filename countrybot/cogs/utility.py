@@ -33,7 +33,7 @@ class Utility(commands.Cog):
         if file is None:
             flagified_img = await imgurls.flagify_image(url)
 
-        else: # TODO: currently, if both are specified, it only returns the file. This should be fixed/signposted
+        else: # TODO: currently, if both are specified, it only returns the file. This should be fixed/signposted.
             flagified_img = await imgurls.flagify_image(file)
 
         with BytesIO() as output:
