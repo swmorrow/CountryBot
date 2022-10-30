@@ -19,33 +19,25 @@ async def embed_img_or_desc(embed: discord.Embed, img_type: Literal["thumbnail",
     """
     value = value.strip()
 
-    async with aiohttp.ClientSession() as session:
-        try:  
-            image_formats = ("image/png", "image/jpeg", "image/jpg", "image/webp")
-            async with session.head(value) as req:
-                if req.content_type in image_formats:
-                    if img_type == "thumbnail":
-                        embed.set_thumbnail(url=value)
-                        if not embed.thumbnail:
-                            embed.add_field(name=f"{name} Link", value=value, inline=False)
-                            return False
-
-                        return True
-
-                    elif img_type == "image":
-                        embed.set_image(url=value)
-                        if not embed.image:
-                            embed.add_field(name=f"{name} Link", value=value, inline=False)
-                            return False
-
-                        return True       
-
-        except aiohttp.InvalidURL:
-            embed.add_field(name=f"{name} Description", value=value, inline=False)
+    if not value.startswith(("http", "https")):
+        embed.add_field(name=name, value=value, inline=False)
+        return False
+        
+    if img_type == "thumbnail":
+        embed.set_thumbnail(url=value)
+        if embed.thumbnail is discord.Embed.Empty: # failed to set thumbnail, so put it in a field as a link instead
+            embed.add_field(name=name, value=value, inline=False)
             return False
 
-    embed.add_field(name=f"{name} Link", value=value, inline=False)
-    return False
+        return True
+
+    # img_type must be "image" if it isnt "thumbnail"
+    embed.set_image(url=value)
+    if embed.image is discord.Embed.Empty: # failed to set image, so put it in a field as a link instead
+        embed.add_field(name=name, value=value, inline=False)
+        return False
+
+    return True       
 
 ### FLAGIFY FUNCTIONS ###
 
@@ -57,12 +49,14 @@ async def flagify_image(flag: discord.Attachment | str) -> PIL.Image:
     if isinstance(flag, str):
         async with aiohttp.ClientSession() as session:
             image_formats = ("image/png", "image/jpeg", "image/jpg", "image/webp")
+
             async with session.head(flag) as req:
                 if not req.content_type in image_formats:
                     raise PIL.UnidentifiedImageError
-            
+
             async with session.get(flag) as req:
-                raw_img = PIL.Image.open(BytesIO(await req.read()))
+                req_img = await req.read()
+                raw_img = PIL.Image.open(BytesIO(req_img))
 
     else:
         raw_img = PIL.Image.open(BytesIO(await flag.read()))

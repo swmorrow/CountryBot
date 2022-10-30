@@ -5,6 +5,7 @@ from pickle import PickleError
 from PIL import UnidentifiedImageError, Image
 import countrybot.utils.excepts as e
 from countrybot.utils.embeds import error_embed
+from traceback import print_exception
 
 class ErrorHandler(commands.Cog):
 
@@ -58,6 +59,7 @@ class ErrorHandler(commands.Cog):
 
                     case _:
                         print(error)
+                        print_exception(error.original)
                         embed = error_embed("Unknown error!")
         
         await ctx.respond(embed=embed, ephemeral=True)
