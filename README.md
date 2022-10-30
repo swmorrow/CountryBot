@@ -43,6 +43,7 @@ The following section is a rough outline for features to be added and a progress
 ### v0.2.x Updates
 - [x] "Flagify" command to convert user uploaded images to discord-style flag emojis
 - [x] Removed needs for member intents
+- [x] Flagify now supports >8mb images
 - [ ] Fix CLI
 - [ ] Help command
 - [x] Fix rpdate reposting when the bot turns off and on again bug
