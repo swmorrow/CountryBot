@@ -34,7 +34,7 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
     bot_guilds = set([guild.id for guild in bot.guilds])
-    registered_guilds = set(io.get_guilds())
+    registered_guilds = set(await io.get_guilds())
 
     guilds_joined = list(bot_guilds.difference(registered_guilds))
     guilds_left = list(registered_guilds.difference(bot_guilds))
@@ -43,7 +43,7 @@ async def on_ready():
         print('Guilds joined since last episode...')
 
         for guild in guilds_joined:
-            io.register(guild)
+            await io.register(guild)
             guild = await bot.fetch_guild(guild)
             print(f'- {bot.user} ~ Joined {guild.name} (id: {guild.id})')
 
@@ -51,7 +51,7 @@ async def on_ready():
         print('Guilds left since last episode...')
 
         for guild in guilds_left:
-            io.unregister(guild)
+            await io.unregister(guild)
             print(f'- {bot.user} ~ Left guild (id: {guild}) :(')
 
 @bot.event
@@ -61,11 +61,11 @@ async def on_application_command(ctx: discord.ApplicationContext):
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     print(f'{bot.user} ~ Joined {guild.name} (id: {guild.id})')
-    io.register(guild.id)
+    await io.register(guild.id)
 
 @bot.event
 async def on_guild_remove(guild: discord.Guild):
     print(f'{bot.user} ~ Left {guild.name} (id: {guild.id}) :(')
-    io.unregister(guild.id)
+    await io.unregister(guild.id)
 
 bot.run(os.getenv('TOKEN'))

@@ -26,7 +26,7 @@ class Playable(commands.Cog):
     async def claim(self, ctx: ApplicationContext) -> None:
         """Send a form to the user to claim a playable entity and sends it to be approved by an admin"""
         
-        io.load_approve_channel(ctx.guild_id) # check if a channel is already set
+        await io.load_approve_channel(ctx.guild_id) # check if a channel is already set
 
         view = views.CountryAddView()
         await ctx.respond("Select an entity below and click the button to create a new country/entity.", view=view, ephemeral=True)
@@ -40,14 +40,14 @@ class Playable(commands.Cog):
     async def set(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
         """Sets a channel for the approval queue"""
 
-        io.save_approve_channel(channel.id, ctx.guild_id)
+        await io.save_approve_channel(channel.id, ctx.guild_id)
         await ctx.respond(embed=emb.success_embed(f"Set country approval channel to <#{channel.id}>."))
 
     @approval_channelgroup.command()
     async def get(self, ctx: ApplicationContext) -> None:
         """Gets the channel used for approvals"""
 
-        channel = io.load_approve_channel(ctx.guild_id)
+        channel = await io.load_approve_channel(ctx.guild_id)
         await ctx.respond(embed=emb.msg_embed(f"The current approval channel is <#{channel}>."))
             
     @approval_channelgroup.command()
@@ -55,8 +55,8 @@ class Playable(commands.Cog):
     async def remove(self, ctx: ApplicationContext) -> None:
         """Removes the current approval queue channel"""
 
-        io.load_approve_channel(ctx.guild_id)
-        io.save_approve_channel(None, ctx.guild_id)
+        await io.load_approve_channel(ctx.guild_id)
+        await io.save_approve_channel(None, ctx.guild_id)
         await ctx.respond(embed=emb.success_embed("Removed the country approval channel."))
 
 def setup(bot):

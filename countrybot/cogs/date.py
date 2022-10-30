@@ -41,7 +41,7 @@ class Date(commands.Cog):
         """Sets the RP date."""
 
         rpdate = RPDate(year, month, day, ticks_per_day)
-        io.save_rpdate(rpdate, ctx.guild_id)
+        await io.save_rpdate(rpdate, ctx.guild_id)
         
         if rpdate.ticks != 1:
             advance = f"{rpdate.ticks} days!"
@@ -54,22 +54,22 @@ class Date(commands.Cog):
     async def get(self, ctx: ApplicationContext) -> None:
         """Sends the current RP date."""
 
-        await ctx.respond(embed=discord.Embed(title=f"The RP date is {io.load_rpdate(ctx.guild_id)}.", color=discord.Color.blurple()))
+        await ctx.respond(embed=discord.Embed(title=f"The RP date is {await io.load_rpdate(ctx.guild_id)}.", color=discord.Color.blurple()))
 
     @dategroup.command()
     @has_permissions(administrator=True)
     async def remove(self, ctx: ApplicationContext) -> None:
         """Removes the current RP date."""
 
-        io.load_rpdate(ctx.guild_id) # check if date is set already
-        io.save_rpdate(None, ctx.guild_id)
+        await io.load_rpdate(ctx.guild_id) # check if date is set already
+        await io.save_rpdate(None, ctx.guild_id)
         await ctx.respond(embed=emb.success_embed(f"Removed the RP date."))
     
     @dategroup.command()
     async def ticks_per_year(self, ctx: ApplicationContext) -> None:
         """Sends the amount of IRL days for each in-RP year."""
 
-        rpdate = io.load_rpdate(ctx.guild_id)
+        rpdate = await io.load_rpdate(ctx.guild_id)
 
         if rpdate.ticks != 1:
             advance = f"{rpdate.ticks} days."
@@ -85,7 +85,7 @@ class Date(commands.Cog):
     async def get(self, ctx: ApplicationContext):
         """Sends the channel that the date is currently set in."""
 
-        channel = io.load_rpdate_channel(ctx.guild_id)
+        channel = await io.load_rpdate_channel(ctx.guild_id)
         await ctx.respond(embed=emb.msg_embed(f"The current date channel is <#{channel}>."))
 
     @channelgroup.command()
@@ -94,7 +94,7 @@ class Date(commands.Cog):
     async def set(self, ctx: ApplicationContext, channel: discord.TextChannel) -> None:
         """Sets a channel for date advancements to be posted in every 24 hours."""
 
-        io.save_rpdate_channel(channel.id, ctx.guild_id,)
+        await io.save_rpdate_channel(channel.id, ctx.guild_id,)
         await ctx.respond(embed=emb.success_embed(f"Set date update channel to <#{channel.id}>."))
 
     @channelgroup.command()
@@ -102,30 +102,30 @@ class Date(commands.Cog):
     async def remove(self, ctx: ApplicationContext) -> None:
         """Removes the current date advancement channel."""
 
-        io.load_rpdate_channel(ctx.guild_id) # check if rpdate channel is set
-        io.save_rpdate_channel(None, ctx.guild_id)
+        await io.load_rpdate_channel(ctx.guild_id) # check if rpdate channel is set
+        await io.save_rpdate_channel(None, ctx.guild_id)
         await ctx.respond(embed=emb.success_embed("Removed the date update channel."))
 
     ### LOOPING ###
 
     @tasks.loop(minutes=30) # make this lower if it doesnt affect performance
     async def advance_date(self):
-        for guild_id in io.get_guilds():
+        for guild_id in await io.get_guilds():
             try:
-                rpdate = io.load_rpdate(guild_id)
-                channel_id = io.load_rpdate_channel(guild_id)
+                rpdate = await io.load_rpdate(guild_id)
+                channel_id = await io.load_rpdate_channel(guild_id)
                 guild_channel = await self.bot.fetch_channel(channel_id)
-                last_posting = io.load_last_rpdate_posting(guild_id)
+                last_posting = await io.load_last_rpdate_posting(guild_id)
 
                 if dt.datetime.now() - last_posting > dt.timedelta(days=1):
                     await guild_channel.send(embed=discord.Embed(title=f"The RP date is {rpdate}.", color=discord.Color.blurple()))
-                    io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
+                    await io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
 
             except Exception as e:
                 if isinstance(e, RPDateNotPostedError):
                     await guild_channel.send(embed=discord.Embed(title=f"The RP date is {rpdate}.", color=discord.Color.blurple())) 
 
-                    io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
+                    await io.save_last_rpdate_posting(dt.datetime.now(), guild_id)
         
 def setup(bot):
     bot.add_cog(Date(bot))

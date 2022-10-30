@@ -120,7 +120,7 @@ class ClaimModal(Modal):
         # image = self.children[4]
 
         embed = await emb.children_to_embed(self.children, self.entity, interaction.user)
-        approval_channel_id = io.load_approve_channel(interaction.guild_id)
+        approval_channel_id = await io.load_approve_channel(interaction.guild_id)
         approval_channel = await interaction.guild.fetch_channel(approval_channel_id)    
         approval_view = views.CountryApprovalView(interaction.user, self, embed)
         approval_view.claim_msg = await approval_channel.send(embed=embed, view=approval_view)
