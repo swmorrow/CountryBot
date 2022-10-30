@@ -114,11 +114,6 @@ async def save_rpdate_channel(rpdate_channel: int, guild_id: int) -> None:
                            WHERE guild_id = (?);''',
                            (rpdate_channel, guild_id))
             await con.commit()
-    if rpdate_channel:
-        print(f"RPDate channel {rpdate_channel} saved to {guild_id}.")
-        return
-    print(f"RPDate channel deleted from {guild_id}.")
-
 
 async def load_rpdate_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
@@ -130,8 +125,9 @@ async def load_rpdate_channel(guild_id: int) -> int:
                                  (guild_id,))
 
             row = await cur.fetchone()
-    if not row[0]:
-        raise ChannelNotSetError
+            
+    if row[0] is None:
+        raise ChannelNotSetError("Date")
 
     return row[0]
 
@@ -145,10 +141,6 @@ async def save_approve_channel(approval_channel, guild_id: int) -> None:
                            WHERE guild_id = (?);''',
                            (approval_channel, guild_id))
             await con.commit()
-    if approval_channel:
-        print(f"Approval channel {approval_channel} saved to {guild_id}.")
-        return
-    print(f"Approval channel deleted from {guild_id}.")
 
 async def load_approve_channel(guild_id: int) -> int:
     """Loads RP date channel from database"""
@@ -160,7 +152,8 @@ async def load_approve_channel(guild_id: int) -> int:
                                  (guild_id,))
 
             row = await cur.fetchone()
+
     if row[0] is None:
-        raise ChannelNotSetError
+        raise ChannelNotSetError("Claims")
 
     return row[0]

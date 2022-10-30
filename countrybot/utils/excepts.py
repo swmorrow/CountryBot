@@ -1,5 +1,7 @@
 class ChannelNotSetError(Exception):
-    pass
+    def __init__(self, channel: str, *args, **kwargs):
+        self.channel = channel
+        super().__init__(*args, **kwargs)
 
 class DateNotSetError(Exception):
     pass

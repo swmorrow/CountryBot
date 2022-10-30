@@ -34,7 +34,7 @@ class ErrorHandler(commands.Cog):
             case _:
                 match error.original:
                     case e.ChannelNotSetError():
-                        embed = error_embed("Channel not set!")
+                        embed = error_embed(f"{error.original.channel} channel not set!")
 
                     case e.DateNotSetError():
                         embed = error_embed("Date not set!")
